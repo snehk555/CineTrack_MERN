@@ -1,25 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import useMovieStore from '../store/useMovieStore';
 
-const SearchBar = ({ selectedCategory, selectedGenre, setError }) => {
+const SearchBar = ({ selectedCategory, selectedGenre, setError, setSelectedCategory, setSelectedGenre }) => {
+
     const { addMovieToStore } = useMovieStore();
 
-    // State: Stores the text currently typed in the search input
     const [searchName, setSearchName] = useState("");
-
-    // State: Holds the live search suggestions returned from the TMDB API
     const [searchResults, setSearchResults] = useState([]);
-
-    // State: Controls the visibility of the search results dropdown
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-    // State: Tracks the loading status during API fetch requests
     const [isLoading, setIsLoading] = useState(false);
-
-    // Ref: Used to detect clicks outside the search container to close the dropdown
     const searchContainerRef = useRef(null);
 
-    // Effect: Handles "click outside" logic for the search dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
@@ -32,7 +23,6 @@ const SearchBar = ({ selectedCategory, selectedGenre, setError }) => {
         };
     }, []);
 
-    // Effect: Handles API calls for movie search with debouncing
     useEffect(() => {
         let timerId;
         const timerApiData = async () => {
@@ -40,7 +30,6 @@ const SearchBar = ({ selectedCategory, selectedGenre, setError }) => {
                 setSearchResults([]);
                 return;
             }
-            // Debounce: 500ms wait karo user ke type band karne ke baad
             timerId = setTimeout(async () => {
                 try {
                     setIsLoading(true);
@@ -58,7 +47,6 @@ const SearchBar = ({ selectedCategory, selectedGenre, setError }) => {
         return () => { clearTimeout(timerId); };
     }, [searchName]);
 
-    // Handler: Adds a movie manually using the text entered in the search bar
     const handleAddMovie = async () => {
         if (!searchName) return;
 
@@ -77,19 +65,21 @@ const SearchBar = ({ selectedCategory, selectedGenre, setError }) => {
 
             if (!response.ok) {
                 setError("Error from our side: please wait and try again later");
+                setTimeout(() => setError(""), 3500);
+                return;
             }
 
             const data = await response.json();
             addMovieToStore(data.movie);
             setSearchName("");
+            setSelectedCategory("")
+            setSelectedGenre("")
             setError("");
-        } catch (error) {
-            // console.log("Network error: ", error);
+        } catch  {
             setError("There is an issue with your network connection");
         }
     };
 
-    // Handler: Adds a specific movie selected from the dropdown suggestions
     const handleSelectMovie = async (selectedMovie) => {
         if (!selectedCategory || !selectedGenre) {
             setError("please select both Category and a Genre before adding a movie!");
@@ -106,74 +96,65 @@ const SearchBar = ({ selectedCategory, selectedGenre, setError }) => {
 
             if (!response.ok) {
                 setError("Error from our side: please wait and try again later");
+                setTimeout(() => setError(""), 3500);
+                return;
             }
 
             const data = await response.json();
             addMovieToStore(data.movie);
             setSearchResults([]);
             setSearchName("");
+            setSelectedCategory("")
+            setSelectedGenre("")
             setError("");
-        } catch (error) {
-            // console.log("Network error: ", error);
+        } catch  {
             setError("There is an issue with your network connection");
         }
     };
 
     return (
-        <div className="search-wrapper" ref={searchContainerRef}>
-            <input
-                type="text"
-                placeholder="🔍 Search for a movie..."
-                value={searchName}
-                onChange={(e) => setSearchName(e.target.value)}
-                style={{
-                    padding: '10px 18px',
-                    borderRadius: '10px',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    color: 'var(--text-main)',
-                    fontSize: '0.95rem',
-                    fontFamily: 'var(--font-family)',
-                    outline: 'none',
-                    width: '280px',
-                    transition: 'all 0.3s ease'
-                }}
-                onFocus={(e) => {
-                    e.target.style.borderColor = 'var(--primary-color)';
-                    e.target.style.boxShadow = '0 0 12px rgba(139, 92, 246, 0.25)';
-                    setIsDropdownOpen(true);
-                }}
-                onBlur={(e) => {
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                    e.target.style.boxShadow = 'none';
-                }}
-            />
-            <button className="btn-primary" onClick={handleAddMovie}>+ Add</button>
+        <div className="relative" ref={searchContainerRef}>
+            <div className="flex gap-2 items-center">
+                <input
+                    type="text"
+                    placeholder="🔍 Search for a movie..."
+                    value={searchName}
+                    onChange={(e) => setSearchName(e.target.value)}
+                    className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-100 text-sm font-[var(--font-outfit)] outline-none w-[280px] transition-all duration-300 focus:border-violet-500 focus:shadow-[0_0_12px_rgba(139,92,246,0.25)]"
+                    onFocus={() => setIsDropdownOpen(true)}
+                />
+                <button
+                    className="bg-violet-600 text-white border-none px-6 py-2.5 rounded-lg font-[var(--font-outfit)] font-medium text-sm cursor-pointer transition-all duration-300 hover:bg-violet-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30"
+                    onClick={handleAddMovie}
+                >
+                    + Add
+                </button>
+            </div>
 
-            {/* Loading State */}
             {isLoading && isDropdownOpen && (
-                <div className="search-dropdown" style={{ padding: '15px', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <div className="absolute top-12 left-0 w-[300px] bg-slate-900/92 backdrop-blur-2xl border border-white/10 rounded-xl p-4 text-center text-slate-400 z-[100] shadow-2xl"
+                     style={{animation: 'slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'}}>
                     <p>Loading...</p>
                 </div>
             )}
 
-            {/* Search Results Dropdown */}
             {!isLoading && isDropdownOpen && searchResults.length > 0 && (
-                <div className="search-dropdown">
+                <div className="absolute top-12 left-0 w-[300px] bg-slate-900/92 backdrop-blur-2xl border border-white/10 rounded-xl p-2 flex flex-col gap-1 z-[100] shadow-2xl"
+                     style={{animation: 'slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'}}>
                     {searchResults.slice(0, 5).map((movie) => (
                         <div
                             key={movie.id}
-                            className="dropdown-item"
+                            className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-violet-500/20"
                             onClick={() => handleSelectMovie(movie)}
                         >
                             {movie.poster_path ? (
-                                <img src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} alt="poster" />
+                                <img src={`https://image.tmdb.org/t/p/w92${movie.poster_path}`} alt="poster" className="w-10 h-15 rounded object-cover" />
                             ) : (
-                                <div className="no-poster">N/A</div>
+                                <div className="w-10 h-15 rounded bg-white/10 flex items-center justify-center text-xs text-slate-400">N/A</div>
                             )}
-                            <div className="dropdown-info">
-                                <h4>{movie.title}</h4>
-                                <span>
+                            <div>
+                                <h4 className="text-sm text-white m-0 whitespace-nowrap overflow-hidden text-ellipsis max-w-[180px]">{movie.title}</h4>
+                                <span className="text-xs text-slate-400 bg-white/10 px-1.5 py-0.5 rounded mt-1 inline-block">
                                     {movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}
                                     • {movie.original_language.toUpperCase()}
                                 </span>

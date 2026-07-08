@@ -1,67 +1,57 @@
-import React from 'react'
-
+import { useEffect } from 'react';
 import MovieCard from './MovieCard.jsx';
-import useMovieStore from '../store/useMovieStore.js';
+import useMovieStore, { watchListStore } from '../store/useMovieStore.js';
 import { Link } from 'react-router-dom';
 
 const MoviesPage = () => {
+    const {movies, setMovies} = useMovieStore();
+    const { userWatchlist, fetchUserWatchlist, addtoWatchlist, cardError} = watchListStore();
 
-     const {movies, setMovies} = useMovieStore();
+  // when there is page load then watchlist is come
 
+  useEffect(() => {
+      fetchUserWatchlist();
+  },[fetchUserWatchlist]);
 
-  // Sends a DELETE request to remove a movie from the database,
-  // then filters it out from local state to update the UI without a full page reload
-  const handledelete = async (id) => {
-    const response = await fetch(`http://localhost:8000/api/movies/delete/${id}`, {
-      method: "DELETE",
-      credentials: 'include'
-    })
-    setMovies(movies.filter((movie) => movie._id !== id))
-  }  
+    const handleWatched = async (id) => {
+          await addtoWatchlist(id);
+    }
 
-  // Marks a movie as watched by sending a PUT request to update the database,
-  // then uses immutable state update (spread operator) to reflect the change in the UI
-  const handleWatched = async (id) => {
-    const response = await fetch(`http://localhost:8000/api/movies/update/${id}`, {
-      method: "PUT",
-      credentials: 'include'
-    })
-    setMovies(movies.map((movie) => {
-      return movie._id === id ? { ...movie, isWatched: true } : movie
-    }))
-  }
+    return (
+        <main>
+            <div className="text-center my-16">
+                <h1 className="text-5xl mb-4 tracking-tight text-white">
+                    Track Your <span className="text-violet-500">Cinematic</span> Journey
+                </h1>
+                <p className="text-slate-400 text-lg max-w-[600px] mx-auto mb-12">
+                    Your personal digital movie diary. Keep track of what you've watched, what you want to watch, and rate your favorites.
+                </p>
 
+             
 
+            </div>
 
+            
 
-  return (
-     <main>
-        <div style={{ textAlign: 'center', margin: '4rem 0' }}>
-          <h1 style={{ fontSize: '3.5rem', marginBottom: '1rem', letterSpacing: '-1px' }}>
-            Track Your <span style={{ color: 'var(--primary-color)' }}>Cinematic</span> Journey
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '0 auto 3rem' }}>
-            Your personal digital movie diary. Keep track of what you've watched, what you want to watch, and rate your favorites.
-          </p>
-        </div>
+            <div className="grid grid-cols-[repeat(auto-fill,180px)] gap-6 mt-8 justify-start items-start">
+                {movies.map((movie) => {
+                     const isMovieWatched = userWatchlist.some((item) => item.movieId?._id === movie._id);
 
-        {/* Movie Grid — Maps over saved movies and renders each as an extracted MovieCard component */}
-        {/* Props passed: movie data, delete handler, and watched status handler */}
-        <div className="movies-grid">
-         {movies.map((movie) => (
-  <Link to={`/movies/${movie._id}`} key={movie._id} style={{ textDecoration: 'none' }}>
-    <MovieCard
-      movie={movie}
-      handledelete={handledelete}
-      handleWatched={handleWatched}
-    />
-  </Link>
-))}
-
-        </div>
-
-      </main>
-  )
+                     return (
+                        <Link to={`/movies/${movie._id}`} key={movie._id} className='no-underline'> 
+                        <MovieCard 
+                        movie={movie}
+                        handleWatched={handleWatched}
+                        isWatched={isMovieWatched}
+                         cardErrorMsg={cardError.movieId === movie._id ? cardError.message : null} 
+                        /> 
+                              
+                        </Link>
+                     )
+                }) }
+            </div>
+        </main>
+    )
 }
 
 export default MoviesPage

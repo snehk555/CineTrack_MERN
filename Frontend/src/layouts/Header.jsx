@@ -1,37 +1,30 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import {Link, useSearchParams} from 'react-router-dom';
 import useAuthStore from '../features/auth/store/useAuthStore';
 import MovieFilters from '../features/movies/components/MovieFilters';
-import SearchBar from '../features/movies/components/SearchBar';
 import UserProfile from '../features/auth/components/UserProfile';
 
 const Header = () => {
     const {user} = useAuthStore();
 
-    // Shared state: Category aur Genre dono SearchBar aur MovieFilters mein chahiye
     const [error, setError] = useState("");
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // reading url values using get request 
     const selectedCategory = searchParams.get('category') || "";
     const selectedGenre = searchParams.get('genre') || "";
 
-    // when user selectes category then this function set the url 
     const setSelectedCategory = (val) => {
-          setSearchParams((prevParams) => {
-              if(val){
-                 prevParams.set('category',val)
-              }
-              else{
-                 prevParams.delete('category'); // if no value then remove from url 
-              }
-
-              return prevParams;
-
-          })
+        setSearchParams((prevParams) => {
+            if (val) {
+                prevParams.set('category', val)
+            } else {
+                prevParams.delete('category');
+            }
+            return prevParams;
+        })
     }
-   // gor genres 
-     const setSelectedGenre = (val) => {
+
+    const setSelectedGenre = (val) => {
         setSearchParams((prevParams) => {
             if (val) {
                 prevParams.set('genre', val);
@@ -43,50 +36,47 @@ const Header = () => {
     };
 
     return (
-        <header className="header">
-            {/* Left: Logo */}
-            <div className="logo">
-                <Link to='/'
-                    style={
-                        {
-                            color: 'inherit',
-                            textDecoration: 'none'
-                        }
-                }>CineTrack 🍿</Link>
+        <header className="flex justify-between items-center pb-6 border-b border-white/8 mb-8">
+            <div>
+                <Link to='/' className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent tracking-tight no-underline">
+                    CineTrack 🍿
+                </Link>
             </div>
 
-            {/* Conditional Rendering: Logged In vs Logged Out */}
-            {
-            user ? (
-                <> {/* Center: Filters + Search */}
-                    <div className="header-controls">
+            {user ? (
+                <>
+                    <div className="flex gap-3 items-center relative">
                         <MovieFilters selectedCategory={selectedCategory}
                             setSelectedCategory={setSelectedCategory}
                             selectedGenre={selectedGenre}
                             setSelectedGenre={setSelectedGenre}/>
-                        <SearchBar selectedCategory={selectedCategory}
-                            selectedGenre={selectedGenre}
-                            setError={setError}/>
                     </div>
 
-                    {/* Right: My Movies + Profile Avatar */}
-                    <div className="nav-group">
-                        <Link to='/movies' className="nav-link">🎬 My Movies</Link>
+                    <div className="flex items-center gap-4">
+                        <Link to='/movies' className="text-slate-400 no-underline font-medium text-sm px-4 py-2 rounded-lg transition-all duration-300 hover:text-white hover:bg-white/5">
+                            🎬 My Movies
+                        </Link>
                         <UserProfile/>
                     </div>
                 </>
             ) : (
-                /* Logged Out: Sirf Login/Signup */ <div className="nav-group">
-                    <Link to="/login" className="btn-primary btn-auth">Login</Link>
-                    <Link to="/signup" className="btn-primary btn-auth">Sign Up</Link>
+                <div className="flex items-center gap-4">
+                    <Link to="/login" className="bg-violet-600 text-white no-underline px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-violet-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30">
+                        Login
+                    </Link>
+                    <Link to="/signup" className="bg-violet-600 text-white no-underline px-5 py-2 rounded-lg font-medium text-sm transition-all duration-300 hover:bg-violet-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30">
+                        Sign Up
+                    </Link>
                 </div>
-            )
-        }
+            )}
 
-            {/* Error Toast */}
-            {
-            error && <div className="error-toast">⚠️ {error}</div>
-        } </header>
+            {error && (
+                <div className="fixed top-5 right-5 bg-red-500/15 border border-red-500/40 text-red-300 px-5 py-3 rounded-xl text-sm font-medium backdrop-blur-xl z-[999] max-w-sm"
+                     style={{animation: 'toastIn 0.4s ease, toastOut 0.4s ease 2.6s forwards'}}>
+                    ⚠️ {error}
+                </div>
+            )}
+        </header>
     );
 };
 

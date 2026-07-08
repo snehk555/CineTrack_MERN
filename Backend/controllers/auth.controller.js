@@ -51,7 +51,8 @@ export const signUp = async (req, res) => {
             user:{
                  _id: newUser._id,
                  name: newUser.name,
-                 email: newUser.email
+                 email: newUser.email,
+                 role: newUser.role
             }
            });
      }
@@ -97,7 +98,8 @@ export const login = async (req , res)  => {
                  user: {
                    _id: user._id,
                    name: user.name,
-                   email: user.email
+                   email: user.email,
+                   role: user.role
                  }
                })
           }
@@ -140,7 +142,8 @@ export const authCheck = async (req, res) => {
           user: {
              _id: req.user._id,
              name: req.user.name,
-             email: req.user.email
+             email: req.user.email,
+             role: req.user.role
           }
        });
        

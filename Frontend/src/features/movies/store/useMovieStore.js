@@ -30,3 +30,66 @@ const useMovieStore = create((set) => ({
 }));
 
 export default useMovieStore;
+
+ export const watchListStore = create((set) => ({
+   
+       userWatchlist : [],
+       cardError: { movieId: null, message: null }, // for showing error 
+       addtoWatchlist :  async (movieId) => {
+         
+        set({ cardError: { movieId: null, message: null } });
+         
+       try { const response =  await  fetch('http://localhost:8000/api/user/addtowatchlist', {
+                   method: "POST",
+                   body: JSON.stringify({movieId}),
+                   headers: { "Content-Type": "application/json"},
+                   credentials: "include"
+
+                }); 
+
+                const data = await response.json();
+
+                if(response.ok){
+                   set((state) => ({
+                       userWatchlist: [...state.userWatchlist, data.WatchingListing],
+                       cardError: { movieId: null, message: null }
+                   }))
+                }
+                else{
+                  // if moive already exist or backend error then , a timeout also 
+                  set({ cardError: { movieId: movieId, message: data.message }})
+                  setTimeout(() => set({ cardError: { movieId: null, message: null } }), 3000)
+                }
+} 
+catch(error) {
+    set({ cardError: { movieId: movieId, message: "Network error!" } })
+    setTimeout(() => set({ cardError: { movieId: null, message: null } }), 3000)
+}
+
+       },
+
+
+   fetchUserWatchlist : async () => {
+               
+      set({error: null});
+      try{
+            const response = await fetch('http://localhost:8000/api/user/getuserwatchlist', {
+                  credentials: "include"
+            })
+
+            const data = await response.json();
+            
+            if(response.ok){
+                 set({userWatchlist: data.watchlist})
+            }
+            else{
+                set({error: data.message || "Failed to load watchlist"})
+            }
+            
+            }
+
+            catch(error){
+                 set({error: "Network error while loading watchlist."})
+            }
+       }
+}))

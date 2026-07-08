@@ -7,6 +7,7 @@ import  CategoryRoute from './routes/category.route.js'
 import GenreRoute from './routes/genre.route.js'
 import authRoutes from './routes/auth.route.js';
 import cookieParser from 'cookie-parser';
+import  watchlistRoute from './routes/watchlist.route.js'
 
 
 dotenv.config(); // this loads the secret of dataenv file 
@@ -27,6 +28,7 @@ app.use("/api/movies", movieRoutes)
 app.use("/api/movies/category", CategoryRoute )
 app.use("/api/movies/genre", GenreRoute)
 app.use("/api/auth", authRoutes)
+app.use("/api/user",watchlistRoute )
 
 
 app.listen(process.env.PORT,() => {

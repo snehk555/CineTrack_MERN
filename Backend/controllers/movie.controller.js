@@ -25,11 +25,11 @@ export const addMovie = async (req, res) => {
     // CASE A: The frontend sent the full movie details directly (e.g., user clicked an item in the search dropdown)
     // Robust Check: We ensure that movieDetails exists AND contains all required fields before proceeding.
     
-    if (movieDetails && movieDetails.title && movieDetails.poster_path && movieDetails.release_date ) {
+    if (movieDetails && movieDetails.title && movieDetails.poster_path) {
       finalMovieData = {
         title: movieDetails.title,
         poster: movieDetails.poster_path,
-        year: movieDetails.release_date 
+        year: movieDetails.release_date || "Unknown" 
       };
     }
     // CASE B: The frontend only sent a search string (e.g., user typed a name and clicked the Add button)
@@ -50,7 +50,7 @@ export const addMovie = async (req, res) => {
       finalMovieData = {
         title: tmdMovie.title,
         poster: tmdMovie.poster_path,
-        year: tmdMovie.release_date
+        year: tmdMovie.release_date || "Unknown"
       };
     }
     // CASE C: The frontend sent neither (Invalid request)
@@ -65,11 +65,14 @@ export const addMovie = async (req, res) => {
       year: finalMovieData.year,
       category: category,
       genre: genre, 
-      userId: req.user._id
+      
 
     });
 
     await newMovie.save();
+    
+    await newMovie.populate("category");
+    await newMovie.populate("genre");
 
     // Step 4: Send a success response back to the frontend
     return res.status(201).json({
@@ -88,7 +91,7 @@ export const addMovie = async (req, res) => {
 export const getMovies = async (req, res) => {
   try {
     const filterQuery = {
-         userId: req.user._id,
+      
     }
     // for category in req.query
     if(req.query.category){
