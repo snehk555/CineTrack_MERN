@@ -1,4 +1,13 @@
-const MovieCard = ({ movie, handleWatched, isWatched ,cardErrorMsg}) => {
+import { Movie } from "../../../shared/types/movie";
+
+interface MovieCardProps {
+    movie: Movie;
+    handleWatched: (id: string) => void | Promise<void>;
+      isWatched?: boolean;                             
+      cardErrorMsg?: string | null;                      
+}
+
+const MovieCard : React.FC<MovieCardProps> = ({ movie, handleWatched, isWatched ,cardErrorMsg}) => {
   return (
     <div className="relative w-[180px] flex flex-col transition-transform duration-300 hover:scale-105 hover:z-10">
       <img src={`https://image.tmdb.org/t/p/w500${movie.poster}`} alt={movie.title} className="w-[180px] h-[270px] object-cover rounded-lg block" />
@@ -17,7 +26,7 @@ const MovieCard = ({ movie, handleWatched, isWatched ,cardErrorMsg}) => {
           {movie.category && (
             <span className="text-[0.65rem] px-2 py-0.5 rounded bg-violet-500/20 text-purple-300 border border-violet-500/30 font-semibold uppercase tracking-wide">{movie.category.name}</span>
           )}
-          {movie.genre && movie.genre.map((g) => (
+          {movie.genre && movie.genre.map((g: { _id: string; name: string }) => (
             <span key={g._id} className="text-[0.65rem] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold uppercase tracking-wide">{g.name}</span>
           ))}
         </div>

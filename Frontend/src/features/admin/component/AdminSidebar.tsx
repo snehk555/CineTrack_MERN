@@ -2,7 +2,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import useAuthStore from '../../auth/store/useAuthStore';
 
-const AdminSidebar = () => {
+const AdminSidebar: React.FC = () => {
   const navigate = useNavigate();
   const {logout} = useAuthStore();
 
@@ -10,6 +10,7 @@ const AdminSidebar = () => {
          await logout();
          navigate("/admin/login");
   }
+  
   return (
     <aside className="w-[260px] min-h-screen bg-[#0f0f1a] border-r border-white/6 flex flex-col px-4 py-7 fixed top-0 left-0">
       <div className="px-2 mb-7">

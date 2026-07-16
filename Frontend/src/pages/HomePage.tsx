@@ -1,5 +1,3 @@
-import React from 'react'
-
 const HomePage = () => {
   return (
     <div className="text-center py-12 text-white">

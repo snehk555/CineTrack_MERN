@@ -1,19 +1,37 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useMovieStore from '../store/useMovieStore';
+import { apiClient } from '../../../shared/lib/apiClient';
 
-const SearchBar = ({ selectedCategory, selectedGenre, setError, setSelectedCategory, setSelectedGenre }) => {
+interface TMDBMovie {
+    id: number;
+    title: string;
+    poster_path: string | null;
+    release_date: string;
+    original_language: string;
+}
+
+interface SearchBarProps {
+    selectedCategory: string;
+    selectedGenre: string;
+    setError: (err: string) => void;
+    setSelectedCategory: (val: string) => void;
+    setSelectedGenre: (val: string) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ selectedCategory, selectedGenre, setError, setSelectedCategory, setSelectedGenre }) => {
 
     const { addMovieToStore } = useMovieStore();
 
     const [searchName, setSearchName] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
+    const [searchResults, setSearchResults] = useState<TMDBMovie[]>([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const searchContainerRef = useRef(null);
+    const searchContainerRef = useRef<HTMLDivElement>(null);
 
+    // Click outside handler — pure UI logic, no API call, keep as is
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
                 setIsDropdownOpen(false);
             }
         };
@@ -23,19 +41,19 @@ const SearchBar = ({ selectedCategory, selectedGenre, setError, setSelectedCateg
         };
     }, []);
 
+    // Debounced search — uses apiClient instead of raw fetch
     useEffect(() => {
-        let timerId;
+        let timerId: number | undefined;
         const timerApiData = async () => {
             if (!searchName) {
                 setSearchResults([]);
                 return;
             }
-            timerId = setTimeout(async () => {
+            timerId = window.setTimeout(async () => {
                 try {
                     setIsLoading(true);
-                    const response = await fetch(`http://localhost:8000/api/movies/search?name=${searchName}`, { credentials: 'include' });
-                    const data = await response.json();
-                    setSearchResults(data);
+                    const response = await apiClient.get(`/movies/search?name=${searchName}`);
+                    setSearchResults(response.data);
                     setIsLoading(false);
                 } catch (error) {
                     console.log("search error:", error);
@@ -56,58 +74,41 @@ const SearchBar = ({ selectedCategory, selectedGenre, setError, setSelectedCateg
         }
 
         try {
-            const response = await fetch("http://localhost:8000/api/movies/add", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ searchName: searchName, category: selectedCategory, genre: [selectedGenre] }),
-                credentials: 'include'
+            const response = await apiClient.post('/movies/add', {
+                searchName,
+                category: selectedCategory,
+                genre: [selectedGenre]
             });
-
-            if (!response.ok) {
-                setError("Error from our side: please wait and try again later");
-                setTimeout(() => setError(""), 3500);
-                return;
-            }
-
-            const data = await response.json();
-            addMovieToStore(data.movie);
+            addMovieToStore(response.data.movie);
             setSearchName("");
-            setSelectedCategory("")
-            setSelectedGenre("")
+            setSelectedCategory("");
+            setSelectedGenre("");
             setError("");
-        } catch  {
-            setError("There is an issue with your network connection");
+        } catch {
+            setError("Error from our side: please wait and try again later");
+            setTimeout(() => setError(""), 3500);
         }
     };
 
-    const handleSelectMovie = async (selectedMovie) => {
+    const handleSelectMovie = async (selectedMovie: TMDBMovie) => {
         if (!selectedCategory || !selectedGenre) {
             setError("please select both Category and a Genre before adding a movie!");
             return;
         }
 
         try {
-            const response = await fetch("http://localhost:8000/api/movies/add", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ movieDetails: selectedMovie, category: selectedCategory, genre: [selectedGenre] }),
-                credentials: 'include'
+            const response = await apiClient.post('/movies/add', {
+                movieDetails: selectedMovie,
+                category: selectedCategory,
+                genre: [selectedGenre]
             });
-
-            if (!response.ok) {
-                setError("Error from our side: please wait and try again later");
-                setTimeout(() => setError(""), 3500);
-                return;
-            }
-
-            const data = await response.json();
-            addMovieToStore(data.movie);
+            addMovieToStore(response.data.movie);
             setSearchResults([]);
             setSearchName("");
-            setSelectedCategory("")
-            setSelectedGenre("")
+            setSelectedCategory("");
+            setSelectedGenre("");
             setError("");
-        } catch  {
+        } catch {
             setError("There is an issue with your network connection");
         }
     };

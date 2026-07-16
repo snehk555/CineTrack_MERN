@@ -1,21 +1,19 @@
-import { useState, useEffect } from 'react';
+import React from 'react';
+import { useCategories } from '../hooks/useCategories';
+import { useGenres } from '../hooks/useGenres';
 
-const MovieFilters = ({ selectedCategory, setSelectedCategory, selectedGenre, setSelectedGenre }) => {
-    const [categories, setCategories] = useState([]);
-    const [genres, setGenres] = useState([]);
+interface MovieFiltersProps {
+    selectedCategory: string;
+    setSelectedCategory: (val: string) => void;
+    selectedGenre: string;
+    setSelectedGenre: (val: string) => void;
+}
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const responseCategory = await fetch("http://localhost:8000/api/movies/category/get");
-            const dataCategory = await responseCategory.json();
-            setCategories(dataCategory);
+const MovieFilters: React.FC<MovieFiltersProps> = ({ selectedCategory, setSelectedCategory, selectedGenre, setSelectedGenre }) => {
 
-            const genreResponse = await fetch("http://localhost:8000/api/movies/genre/get");
-            const dataGenre = await genreResponse.json();
-            setGenres(dataGenre);
-        };
-        fetchData();
-    }, []);
+    // TanStack Query hooks - automatically cached, no useEffect/useState needed
+    const { data: categories = [] } = useCategories();
+    const { data: genres = [] } = useGenres();
 
     return (
         <>

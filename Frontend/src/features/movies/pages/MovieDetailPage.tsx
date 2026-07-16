@@ -1,12 +1,13 @@
 import useMovieStore from '../store/useMovieStore.js';
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom';
+import { Movie } from '../../../shared/types/movie';
 
-const MovieDetailPage = () => {
+const MovieDetailPage: React.FC = () => {
     const { movies } = useMovieStore();
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const selectedMovie = movies.find((movie) => movie._id === id);
+    const selectedMovie = movies.find((movie) => movie._id === id) as (Movie & { isWatched?: boolean }) | undefined;
 
     if (!selectedMovie) return <h2 className="text-white text-center mt-24">Loading Movie...</h2>;
 

@@ -1,6 +1,8 @@
+import { SubmitEventHandler } from "react";
 import { useState } from "react";
 import useAuthStore from "../../auth/store/useAuthStore";
 import { useNavigate } from "react-router-dom";
+import { apiClient } from "../../../shared/lib/apiClient";
 
 const AdminLoginPage = () => {
   const [email, setEmail] = useState("");
@@ -10,35 +12,21 @@ const AdminLoginPage = () => {
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
     setError("");
-    
     try {
-      const response = await fetch("http://localhost:8000/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Strict Authorization Check: Restrict access to administrators only
-        if(data.user.role === 'admin') {
-           setUser(data.user);
-           navigate("/admin");
-        } else {
-           setError("Access Denied: Administrator privileges are required.");
-        }
+      const response = await apiClient.post('/auth/login', { email, password });
+      const user = response.data.user;
+      // Strict Authorization Check: Restrict access to administrators only
+      if (user.role === 'admin') {
+        setUser(user);
+        navigate("/admin");
       } else {
-        setError(data.error || "An error occurred during authentication.");
+        setError("Access Denied: Administrator privileges are required.");
       }
-    } catch (er) {
-      setError("Network error. Please check your connection and try again.");
+    } catch (er: any) {
+      setError(er.response?.data?.error || "An error occurred during authentication.");
     }
   };
 

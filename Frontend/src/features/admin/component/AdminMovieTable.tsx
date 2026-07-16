@@ -1,4 +1,11 @@
-const AdminMovieTable = ({ movies, onDelete }) => {
+import { Movie } from "../../../shared/types/movie";
+
+interface AdminMovieTableProps {
+         movies: Movie[],
+         onDelete: (id: string) => void
+}
+
+const AdminMovieTable: React.FC<AdminMovieTableProps> = ({ movies, onDelete }) => {
 
   if (!movies || movies.length === 0) {
     return (
@@ -43,7 +50,7 @@ const AdminMovieTable = ({ movies, onDelete }) => {
               </td>
               <td className="px-5 py-3">
   <div className="flex gap-1 flex-wrap">
-    {movie.genre && movie.genre.map((g) => (
+    {movie.genre && movie.genre.map((g: { _id: string; name: string }) => (
       <span key={g._id} className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/20 font-medium">
         {g.name}
       </span>
