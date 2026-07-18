@@ -1,22 +1,15 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-import { BrowserRouter } from 'react-router-dom';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from '../shared/lib/queryClient';
-
+import './index.css';
+import App from './App';
+import Providers from './providers';
 
 createRoot(document.getElementById('root') as HTMLElement).render(
- 
   <StrictMode>
-     <QueryClientProvider client={queryClient}>
-     <BrowserRouter>
-    <App />
-     <Toaster richColors position="bottom-right" theme="dark" />
-     </BrowserRouter>
-</QueryClientProvider>
+    <Providers>
+      <App />
+      <Toaster richColors position="bottom-right" theme="dark" />
+    </Providers>
   </StrictMode>
- 
-)
+);

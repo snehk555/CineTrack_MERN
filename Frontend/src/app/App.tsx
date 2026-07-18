@@ -1,106 +1,95 @@
-import {useEffect} from 'react';
+import { useEffect, lazy, Suspense } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector, initializeAuth } from '../store';
+import { connectSocket, disconnectSocket } from '../services/socket';
+import { useNotifications, useBanListener } from '../shared/hooks/useSocket';
+import ProtectedRoute from '../shared/components/common/ProtectedRoute';
+import AdminRoute from '../shared/components/common/AdminRoute';
+import Spinner from '../shared/components/ui/Spinner';
 
-import {
-    Routes,
-    Route,
-    Navigate,
-    useLocation
-} from 'react-router-dom';
-import HomePage from '../pages/HomePage.jsx';
-import MoviesPage from '../features/movies/pages/MoviesPage.jsx';
-import NotFoundPage from '../pages/NotFoundPage.jsx';
-import MovieDetailPage from '../features/movies/pages/MovieDetailPage.jsx';
+const HomePage = lazy(() => import('../pages/HomePage'));
+const MoviesPage = lazy(() => import('../features/movies/pages/MoviesPage'));
+const MovieDetailPage = lazy(() => import('../features/movies/pages/MovieDetailPage'));
+const LoginPage = lazy(() => import('../features/auth/pages/LoginPage'));
+const RegisterPage = lazy(() => import('../features/auth/pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('../features/auth/pages/ForgotPasswordPage'));
+const WatchlistPage = lazy(() => import('../pages/WatchlistPage'));
+const ProfilePage = lazy(() => import('../pages/ProfilePage'));
+const SubscriptionPage = lazy(() => import('../pages/SubscriptionPage'));
+const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
 
-import LoginPage from '../features/auth/pages/LoginPage.jsx';
-import SignupPage from '../features/auth/pages/SignupPage.jsx';
-import useAuthStore from '../features/auth/store/useAuthStore.js';
-import AdminDashboard from '../features/admin/pages/AdminDashboard.jsx';
-import AdminLoginPage from '../features/admin/pages/AdminLoginPage.jsx';
-import AdminAddMovie from '../features/admin/pages/AdminAddMovie.jsx';
-import AdminManageMovies from '../features/admin/pages/AdminManageMovies.jsx';
-import Header from '../shared/ui/Header.js';
+const AdminLayout = lazy(() => import('../features/admin/components/AdminLayout'));
+const AdminDashboardPage = lazy(() => import('../features/admin/pages/AdminDashboardPage'));
+const AdminMoviesPage = lazy(() => import('../features/admin/pages/AdminMoviesPage'));
+const AdminUsersPage = lazy(() => import('../features/admin/pages/AdminUsersPage'));
+const AdminAnalyticsPage = lazy(() => import('../features/admin/pages/AdminAnalyticsPage'));
+const AdminReviewsPage = lazy(() => import('../features/admin/pages/AdminReviewsPage'));
 
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <Spinner size="lg" />
+  </div>
+);
 
 const App = () => {
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, isLoading, user } = useAppSelector((state) => state.auth);
 
-    const {user, checkAuth, isCheckingAuth} = useAuthStore();
+  // Initialize auth on mount
+  useEffect(() => {
+    dispatch(initializeAuth());
+  }, [dispatch]);
 
-    useEffect(() => {
-        checkAuth();
-    }, []);
-
-     const location = useLocation();
-    const isAdminRoute = location.pathname.startsWith('/admin');
-
-    if (isCheckingAuth && !user) {
-        return (
-            <div className="flex justify-center items-center h-screen text-white">
-                <h2>Loading CineTrack...🍿</h2>
-            </div>
-        )
+  // Socket lifecycle — connect on login, disconnect on logout
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      connectSocket(user._id);
+    } else {
+      disconnectSocket();
     }
+  }, [isAuthenticated, user]);
+
+  // Global socket event listeners (only active when connected)
+  useNotifications();
+  useBanListener();
+
+  if (isLoading) return <PageLoader />;
 
 
-   
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
+        <Route path="/register" element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-    if (isAdminRoute) {
-        return (
-            <Routes> {/* 1. Main Admin Dashboard */}
-                <Route path='/admin'
-                    element={
-                        !user ? <Navigate to="/admin/login"/> : user.role === 'admin' ? <AdminDashboard/>: <Navigate to="/"/>}/>
-                  
+        {/* Protected routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/movies" element={<MoviesPage />} />
+          <Route path="/movies/:id" element={<MovieDetailPage />} />
+          <Route path="/watchlist" element={<WatchlistPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+        </Route>
 
-                    {/* 2.  Admin Login Page */}
-                <Route path='/admin/login'
-                    element={
-                        !user ? <AdminLoginPage/>: user.role === 'admin' ? <Navigate to="/admin"/> : <Navigate to="/"/>}/>
-                   
+        {/* Admin routes — AdminRoute checks role, AdminLayout provides sidebar+topbar */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboardPage />} />
+            <Route path="movies" element={<AdminMoviesPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="reviews" element={<AdminReviewsPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
+          </Route>
+        </Route>
 
-
-                <Route path='/admin/add-movie'
-                    element={
-                        !user ? <Navigate to="/admin/login"/> : user.role === 'admin' ? <AdminAddMovie/>: <Navigate to="/"/>}/>
-                  
-
-                <Route path='/admin/movies'
-                    element={
-                        !user ? <Navigate to="/admin/login"/> : user.role === 'admin' ? <AdminManageMovies/>: <Navigate to="/"/>}/>
-                  
-                  {/* 3. for wrong url 404 */}
-                <Route path='*'
-                    element={<NotFoundPage/>}/>
-            </Routes>
-        );
-    }
-
-    return (
-        <div className="max-w-[1200px] mx-auto px-8 py-8">
-
-            <Header/>
-
-            <Routes>
-
-                <Route path='/'
-                    element={<HomePage/>}/>
-
-                <Route path='/movies'
-                    element={<MoviesPage/>}/>
-
-                <Route path='/movies/:id'
-                    element={<MovieDetailPage/>}/>
-                <Route path='/login'
-                    element={<LoginPage/>}/>
-                <Route path='/signup'
-                    element={<SignupPage/>}/>
-
-                <Route path='*'
-                    element={<NotFoundPage/>}/>
-
-            </Routes>
-
-        </div>
-    );
-}
+        {/* 404 */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
+  );
+};
 
 export default App;

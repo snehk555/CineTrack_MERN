@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import useMovieStore from '../store/useMovieStore';
-import { apiClient } from '../../../shared/lib/apiClient';
+import apiClient from '../../../services/axios';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface TMDBMovie {
     id: number;
@@ -19,8 +19,7 @@ interface SearchBarProps {
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ selectedCategory, selectedGenre, setError, setSelectedCategory, setSelectedGenre }) => {
-
-    const { addMovieToStore } = useMovieStore();
+  const queryClient = useQueryClient();
 
     const [searchName, setSearchName] = useState("");
     const [searchResults, setSearchResults] = useState<TMDBMovie[]>([]);
@@ -74,19 +73,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ selectedCategory, selectedGenre, 
         }
 
         try {
-            const response = await apiClient.post('/movies/add', {
-                searchName,
-                category: selectedCategory,
-                genre: [selectedGenre]
-            });
-            addMovieToStore(response.data.movie);
-            setSearchName("");
-            setSelectedCategory("");
-            setSelectedGenre("");
-            setError("");
+            await apiClient.post('/v1/movies/add', { searchName, categoryId: selectedCategory, genreIds: [selectedGenre] });
+            queryClient.invalidateQueries({ queryKey: ['movies'] });
+            setSearchName('');
+            setSelectedCategory('');
+            setSelectedGenre('');
+            setError('');
         } catch {
-            setError("Error from our side: please wait and try again later");
-            setTimeout(() => setError(""), 3500);
+            setError('Error adding movie — please try again');
+            setTimeout(() => setError(''), 3500);
         }
     };
 
@@ -97,19 +92,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ selectedCategory, selectedGenre, 
         }
 
         try {
-            const response = await apiClient.post('/movies/add', {
-                movieDetails: selectedMovie,
-                category: selectedCategory,
-                genre: [selectedGenre]
-            });
-            addMovieToStore(response.data.movie);
+            await apiClient.post('/v1/movies/add', { movieDetails: selectedMovie, categoryId: selectedCategory, genreIds: [selectedGenre] });
+            queryClient.invalidateQueries({ queryKey: ['movies'] });
             setSearchResults([]);
-            setSearchName("");
-            setSelectedCategory("");
-            setSelectedGenre("");
-            setError("");
+            setSearchName('');
+            setSelectedCategory('');
+            setSelectedGenre('');
+            setError('');
         } catch {
-            setError("There is an issue with your network connection");
+            setError('Network error — please try again');
         }
     };
 

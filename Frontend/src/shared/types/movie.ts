@@ -1,18 +1,2 @@
-export interface Category {
-  _id: string;
-  name: string;
-}
-
-export interface Genre {
-  _id: string;
-  name: string;
-}
-
-export interface Movie {
-  _id: string;
-  title: string;
-  year: number;
-  poster: string;
-  category?: Category;
-  genre?: Genre[];
-}
+// Compatibility shim — types moved to src/types/index.ts
+export type { Movie, Category, Genre, User, Review, WatchlistEntry } from '../../types/index';

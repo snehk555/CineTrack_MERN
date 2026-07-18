@@ -1,18 +1,22 @@
-import {useState, useEffect, useRef} from 'react';
-import useAuthStore from '../store/useAuthStore';
-import {useNavigate} from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppSelector, useAppDispatch, clearUser } from '../../../store';
+import apiClient from '../../../services/axios';
 
 const UserProfile = () => {
-    const {user, logout} = useAuthStore();
-    const navigate = useNavigate();
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const profileRef = useRef<HTMLDivElement>(null);
+  const user = useAppSelector((state) => state.auth.user);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
 
-    const handleLogout = async () => {
-        await logout();
-        setIsProfileOpen(false);
-        navigate("/login");
-    };
+  const handleLogout = async () => {
+    await apiClient.post('/v1/auth/logout').catch(() => null);
+    dispatch(clearUser());
+    setIsProfileOpen(false);
+    navigate('/login');
+  };
+
 
     useEffect(() => {
         const handleClickOutside = (event:MouseEvent) => {

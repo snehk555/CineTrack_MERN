@@ -1,17 +1,19 @@
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
-const NotFoundPage = () => {
+export default function NotFoundPage() {
+  const navigate = useNavigate();
   return (
-    <div className="text-center py-24 text-white">
-      <h1 className="text-8xl mb-2 font-bold">404</h1>
-      <h2 className="text-2xl mb-2">Oops! Page Not Found</h2>
-      <p className="text-slate-400 mb-8">
-        The page you are looking for does not exist.
-      </p>
-      <Link to="/" className="bg-violet-600 text-white no-underline px-6 py-3 rounded-lg font-medium transition-all duration-300 hover:bg-violet-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30">
-        Go Back Home
-      </Link>
+    <div className="min-h-screen bg-[#09090f] flex flex-col items-center justify-center text-center px-4">
+      <div className="text-8xl mb-6">🎬</div>
+      <h1 className="text-6xl font-bold text-white mb-3">404</h1>
+      <p className="text-xl text-slate-400 mb-2">Scene not found</p>
+      <p className="text-slate-500 text-sm mb-8">This page has been cut from the final edit.</p>
+      <button
+        onClick={() => navigate('/')}
+        className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-xl transition-colors active:scale-95"
+      >
+        ← Back to Home
+      </button>
     </div>
-  )
+  );
 }
-export default NotFoundPage
