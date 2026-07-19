@@ -5,6 +5,7 @@ import { logger } from '../utils/logger.js';
 import { uploadImage } from '../utils/cloudinary.js';
 import { MediaJobData } from '../queues/mediaQueue.js';
 import Movie from '../models/movie.model.js';
+import { emitToAdmins } from '../sockets/socketHandler.js';
 
 const processMediaJob = async (job: Job<MediaJobData>) => {
   const { type, payload } = job.data;
@@ -24,25 +25,50 @@ const processMediaJob = async (job: Job<MediaJobData>) => {
       });
 
       logger.info(`Poster uploaded for movie ${payload.movieId}: ${publicId}`);
+
+      // Notify admins that poster processing is done
+      try {
+        emitToAdmins('video:processed', { movieId: payload.movieId, percent: 100 });
+      } catch { /* socket may not be init in test */ }
       break;
     }
 
     case 'process-video': {
       logger.info(`Video processing queued for movie ${payload.movieId} — qualities: ${payload.qualities.join(', ')}`);
 
-      await Movie.findByIdAndUpdate(payload.movieId, {
-        $set: { processingStatus: 'processing' },
-      });
+      const emitProgress = (percent: number) => {
+        try {
+          emitToAdmins('video:progress', { movieId: payload.movieId, jobId: job.id, percent });
+        } catch { /* ignore */ }
+      };
 
+      emitProgress(10);
       await job.updateProgress(10);
 
-      // FFmpeg transcoding — Phase 16 (Video Streaming) mein implement hoga
-      // Placeholder: status update + progress simulation
-      await job.updateProgress(100);
+      // Simulate processing stages — real FFmpeg goes here in production
+      await new Promise((r) => setTimeout(r, 500));
+      emitProgress(30);
+      await job.updateProgress(30);
+
+      await new Promise((r) => setTimeout(r, 500));
+      emitProgress(60);
+      await job.updateProgress(60);
+
+      await new Promise((r) => setTimeout(r, 500));
+      emitProgress(80);
+      await job.updateProgress(80);
 
       await Movie.findByIdAndUpdate(payload.movieId, {
         $set: { processingStatus: 'ready' },
       });
+
+      emitProgress(100);
+      await job.updateProgress(100);
+
+      // Notify admins: video fully processed
+      try {
+        emitToAdmins('video:processed', { movieId: payload.movieId, jobId: job.id, percent: 100 });
+      } catch { /* ignore */ }
 
       logger.info(`Video processing marked ready for movie ${payload.movieId}`);
       break;

@@ -1,15 +1,6 @@
 import { useState } from 'react';
-import { useAdminReviews, useReviewActionMutation } from '../hooks/adminQueries';
-
-interface Review {
-  _id: string;
-  movieId: { _id: string; title: string; posterPath?: string };
-  userId: { _id: string; name: string; email: string };
-  rating: number;
-  comment: string;
-  createdAt: string;
-  isApproved: boolean;
-}
+import { useAdminReviews, useApproveReviewMutation, useRejectReviewMutation } from '../hooks/adminQueries';
+import type { ReviewWithDetails } from '../hooks/adminQueries';
 
 const TABS = [
   { key: 'pending', label: 'Pending', icon: '⏳' },
@@ -19,8 +10,12 @@ const TABS = [
 
 export default function AdminReviewsPage() {
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
-  const { data: reviews, isLoading } = useAdminReviews(activeTab);
-  const { mutate: reviewAction, isPending } = useReviewActionMutation();
+  const { data, isLoading } = useAdminReviews(activeTab);
+  const { mutate: approveReview, isPending: approving } = useApproveReviewMutation();
+  const { mutate: rejectReview, isPending: rejecting } = useRejectReviewMutation();
+
+  const reviews: ReviewWithDetails[] = data?.reviews ?? [];
+  const isPending = approving || rejecting;
 
   return (
     <div className="space-y-6">
@@ -43,7 +38,7 @@ export default function AdminReviewsPage() {
             {tab.icon} {tab.label}
             {tab.key === 'pending' && (
               <span className="ml-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">
-                {Array.isArray(reviews) ? reviews.length : 0}
+                {data?.total ?? 0}
               </span>
             )}
           </button>
@@ -57,7 +52,7 @@ export default function AdminReviewsPage() {
             <div key={i} className="h-28 bg-white/5 border border-white/8 rounded-2xl animate-pulse" />
           ))}
         </div>
-      ) : !reviews || reviews.length === 0 ? (
+      ) : reviews.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-4xl mb-3">
             {activeTab === 'pending' ? '✅' : activeTab === 'approved' ? '🎉' : '🗑️'}
@@ -68,7 +63,7 @@ export default function AdminReviewsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {(reviews as Review[]).map((review) => (
+          {reviews.map((review) => (
             <div key={review._id} className="bg-white/5 border border-white/8 rounded-2xl p-5 hover:border-white/15 transition-colors">
               <div className="flex flex-wrap items-start justify-between gap-4">
 
@@ -76,7 +71,7 @@ export default function AdminReviewsPage() {
                 <div className="flex items-start gap-4 min-w-0">
                   {review.movieId?.posterPath && (
                     <img
-                      src={`https://image.tmdb.org/t/p/w45${review.movieId.posterPath}`}
+                      src={review.movieId.posterPath}
                       alt={review.movieId.title}
                       className="w-8 h-12 object-cover rounded-lg shrink-0"
                     />
@@ -95,14 +90,14 @@ export default function AdminReviewsPage() {
                 {activeTab === 'pending' && (
                   <div className="flex gap-2 shrink-0">
                     <button
-                      onClick={() => reviewAction({ id: review._id, action: 'approve' })}
+                      onClick={() => approveReview(review._id)}
                       disabled={isPending}
                       className="px-4 py-2 text-xs font-medium bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 rounded-xl transition-colors disabled:opacity-50"
                     >
                       ✓ Approve
                     </button>
                     <button
-                      onClick={() => reviewAction({ id: review._id, action: 'reject' })}
+                      onClick={() => rejectReview(review._id)}
                       disabled={isPending}
                       className="px-4 py-2 text-xs font-medium bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 rounded-xl transition-colors disabled:opacity-50"
                     >

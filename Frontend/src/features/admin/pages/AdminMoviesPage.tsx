@@ -92,7 +92,7 @@ export default function AdminMoviesPage() {
   const { mutate: deleteMovie, isPending: deleting } = useAdminDeleteMovie();
   const { mutate: featureMovie } = useFeatureMovieMutation();
 
-  const movies: Movie[] = data?.data ?? [];
+  const movies: Movie[] = data?.movies ?? [];
   const totalPages: number = data?.totalPages ?? 1;
 
   return (
@@ -212,7 +212,7 @@ export default function AdminMoviesPage() {
                     {/* Featured Toggle */}
                     <td className="px-4 py-3">
                       <button
-                        onClick={() => featureMovie({ id: movie._id, featured: !movie.isFeatured })}
+                        onClick={() => featureMovie({ id: movie._id })}
                         className={`text-lg transition-all hover:scale-110 ${movie.isFeatured ? 'opacity-100' : 'opacity-25 hover:opacity-60'}`}
                         title={movie.isFeatured ? 'Unfeature' : 'Feature'}
                       >

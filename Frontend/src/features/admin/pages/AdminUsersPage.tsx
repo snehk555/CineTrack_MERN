@@ -84,7 +84,7 @@ export default function AdminUsersPage() {
   const { data, isLoading } = useAdminUsers({ search: debouncedSearch, role: roleFilter, page });
   const { mutate: unbanUser } = useUnbanUserMutation();
 
-  const users: User[] = data?.data ?? [];
+  const users: User[] = data?.users ?? [];
   const totalPages: number = data?.totalPages ?? 1;
 
   return (

@@ -6,7 +6,6 @@ import NotificationDropdown from '../ui/NotificationDropdown';
 
 export default function Navbar() {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  const unreadCount = useAppSelector((state) => state.ui.unreadNotifications);
   const dispatch = useAppDispatch();
   const { mutate: logout } = useLogoutMutation();
 

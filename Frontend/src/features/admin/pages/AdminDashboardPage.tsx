@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
@@ -32,7 +31,6 @@ const CHART_STYLE = {
 };
 
 export default function AdminDashboardPage() {
-  const navigate = useNavigate();
   const { data: stats, isLoading } = useAdminDashboard();
 
   return (
@@ -44,7 +42,7 @@ export default function AdminDashboardPage() {
           <p className="text-slate-400 text-sm mt-0.5">Welcome back — here's what's happening.</p>
         </div>
         <button
-          onClick={() => navigate('/admin/movies')}
+          onClick={() => window.location.href = '/admin/movies'}
           className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors active:scale-95 flex items-center gap-2"
         >
           + Add Movie
@@ -53,10 +51,10 @@ export default function AdminDashboardPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard icon="👥" label="Total Users" value={stats?.totalUsers ?? 0} trend={8} loading={isLoading} />
-        <StatsCard icon="🆕" label="New Today" value={stats?.newUsersToday ?? 0} trend={12} loading={isLoading} />
-        <StatsCard icon="🎬" label="Total Movies" value={stats?.totalMovies ?? 0} loading={isLoading} />
-        <StatsCard icon="💳" label="Subscriptions" value={stats?.activeSubscriptions ?? 0} trend={3} loading={isLoading} />
+        <StatsCard icon="👥" label="Total Users" value={stats?.users?.total ?? 0} trend={8} loading={isLoading} />
+        <StatsCard icon="🆕" label="New Today" value={stats?.users?.newToday ?? 0} trend={12} loading={isLoading} />
+        <StatsCard icon="🎬" label="Total Movies" value={stats?.movies?.total ?? 0} loading={isLoading} />
+        <StatsCard icon="💳" label="Subscriptions" value={stats?.subscriptions?.active ?? 0} trend={3} loading={isLoading} />
       </div>
 
       {/* Charts Row */}
