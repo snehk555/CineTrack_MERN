@@ -16,7 +16,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
         {label && (
           <label htmlFor={inputId} className="text-sm font-medium text-slate-300">
             {label}
-            {required && <span className="text-violet-400 ml-1">*</span>}
+            {required && <span className="text-amber-400 ml-1">*</span>}
           </label>
         )}
         <div className="relative">
@@ -29,7 +29,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
               outline-none transition-all duration-200 placeholder:text-slate-500
               ${error
                 ? 'border-red-500/60 focus:border-red-500 focus:shadow-[0_0_10px_rgba(239,68,68,0.2)]'
-                : 'border-white/10 focus:border-violet-500 focus:shadow-[0_0_12px_rgba(139,92,246,0.25)]'
+                : 'border-white/10 focus:border-amber-500 focus:shadow-[0_0_12px_rgba(139,92,246,0.25)]'
               }
               ${className}
             `}

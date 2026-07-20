@@ -1,34 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-outfit: 'Outfit', sans-serif;
-  --color-surface: rgba(255, 255, 255, 0.03);
-  --color-surface-border: rgba(255, 255, 255, 0.08);
-  --color-brand: #8b5cf6;
-  --color-brand-hover: #7c3aed;
-  --color-accent: #10b981;
-  --color-danger: #ef4444;
-  --color-admin-red: #E50914;
-  --color-dark-bg: #0b0914;
-  --color-dark-surface: #0f0f1a;
-  --color-dark-card: #1e1b2e;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --color-dark-bg: #09090b; /* zinc-950 - true black */
+  --color-dark-surface: #111113;
+  --color-dark-card: #18181b; /* zinc-900 */
+}
+
+:root {
+  --bg-base:         #09090b;   /* zinc-950 - true black */
+  --bg-surface:      #111113;   /* slightly lighter panels */
+  --bg-elevated:     #18181b;   /* zinc-900 - cards, dropdowns */
+  --bg-hover:        #27272a;   /* zinc-800 - hover states */
+  --border-strong:   #3f3f46;   /* zinc-700 - active borders */
+  --text-muted:      #52525b;   /* zinc-600 */
 }
 
 body {
-  font-family: var(--font-outfit);
-  background-color: var(--color-dark-bg);
-  background-image:
-    radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
-  background-attachment: fixed;
+  font-family: var(--font-sans);
+  background-color: var(--bg-base);
+  color: #fafafa;
+  min-height: 100vh;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 3px; }
+/* Scrollbar matches admin */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* Custom select arrow for dropdowns */
 select {

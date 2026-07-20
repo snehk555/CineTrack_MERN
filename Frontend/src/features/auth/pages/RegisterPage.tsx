@@ -40,11 +40,11 @@ export default function RegisterPage() {
   const onSubmit = (data: RegisterFormData) => registerUser(data);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090f] px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#09090b] px-4 py-8">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-1">
-            🎬 <span className="text-violet-400">CineTrack</span>
+            🎬 <span className="text-amber-400">CineTrack</span>
           </h1>
           <p className="text-slate-400 text-sm">Join your movie universe</p>
         </div>
@@ -80,7 +80,7 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-slate-400 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
+            <Link to="/login" className="text-amber-400 hover:text-amber-300 font-medium transition-colors">
               Sign in
             </Link>
           </p>

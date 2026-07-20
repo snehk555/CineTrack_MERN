@@ -2,17 +2,17 @@ import Movie from '../../models/movie.model.js';
 import { MovieQueryInput, AddMovieInput, UpdateMovieInput } from './movie.schema.js';
 
 export const movieRepository = {
-  async findAll({ page, limit, search, category, genre, sortBy, order }: MovieQueryInput) {
+  async findAll({ page, limit, search, categoryId, genreId, sortBy, order }: MovieQueryInput) {
     const filter: Record<string, unknown> = { isDeleted: false };
 
     if (search) {
       filter.title = { $regex: search, $options: 'i' };
     }
-    if (category) {
-      filter.categoryId = category;
+    if (categoryId) {
+      filter.categoryId = categoryId;
     }
-    if (genre) {
-      filter.genreIds = genre;
+    if (genreId) {
+      filter.genreIds = genreId;
     }
 
     const sortOrder = order === 'asc' ? 1 : -1;
@@ -29,9 +29,9 @@ export const movieRepository = {
       Movie.countDocuments(filter),
     ]);
 
-    return { movies, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { data: movies, total, page, limit, totalPages: Math.ceil(total / limit) };
   },
-
+ 
   async findById(id: string) {
     return Movie.findOne({ _id: id, isDeleted: false })
       .populate('categoryId', 'name icon')

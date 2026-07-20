@@ -1,0 +1,79 @@
+.step2-taxonomy .genres-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.genres-loading {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.genres-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.genre-badge-selectable {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.genre-badge-selectable:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.genre-badge-selectable.selected {
+  background: var(--genre-color, var(--primary));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 12px -2px var(--genre-color, var(--primary));
+  opacity: 0.9;
+}
+
+.genre-badge-selectable.selected:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+.d-block {
+  display: block;
+}
+
+.inline-create-group {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.inline-create-group .input-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.category-select-wrapper {
+  position: relative;
+}

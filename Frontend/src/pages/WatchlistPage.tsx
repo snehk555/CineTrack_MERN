@@ -9,7 +9,7 @@ export default function WatchlistPage() {
   const { data: watchlist, isLoading } = useWatchlist();
 
   return (
-    <div className="min-h-screen bg-[#09090f]">
+    <div className="min-h-screen bg-[#09090b]">
       <div className="max-w-7xl mx-auto px-6 py-10">
 
         {/* Header */}
@@ -51,7 +51,7 @@ export default function WatchlistPage() {
             <p className="text-slate-400 text-sm mt-1 mb-6">Start adding movies you want to watch</p>
             <button
               onClick={() => navigate('/movies')}
-              className="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-xl transition-colors"
+              className="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-xl transition-colors"
             >
               Browse Movies
             </button>

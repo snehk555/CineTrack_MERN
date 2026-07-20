@@ -103,9 +103,9 @@ const processMediaJob = async (job: Job<MediaJobData>) => {
 };
 
 export const mediaWorker = new Worker<MediaJobData>(
-  'cinetrack:media',
+  'media',
   processMediaJob,
-  { connection: redis, concurrency: 2 }
+  { prefix: 'cinetrack', connection: redis, concurrency: 2 }
 );
 
 mediaWorker.on('completed', (job) => {

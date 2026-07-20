@@ -254,7 +254,21 @@ export const adminService = {
     if (existing) throw new ConflictError('Movie with this TMDB ID already exists');
 
     const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + data.tmdbId;
-    const movie = await Movie.create({ ...data, slug, processingStatus: 'pending' });
+    
+    // Add the videoUrl to videoUrls if provided, but keep status pending for the worker
+    const videoUrls = data.videoUrl ? { default: data.videoUrl } : undefined;
+    const movie = await Movie.create({ ...data, slug, processingStatus: 'pending', videoUrls });
+
+    // Enqueue video processing job in BullMQ if videoUrl exists
+    if (data.videoUrl) {
+      import('../../queues/mediaQueue.js').then(({ addProcessVideoJob }) => {
+        addProcessVideoJob({
+          movieId: movie._id.toString(),
+          filePath: data.videoUrl!, // Using the provided URL/path
+          qualities: ['360p', '720p', '1080p'],
+        }).catch(() => null);
+      });
+    }
 
     // Notify admins via socket
     try {

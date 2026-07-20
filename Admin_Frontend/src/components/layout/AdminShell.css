@@ -1,0 +1,46 @@
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-shell__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* prevents flex overflow */
+  background: var(--bg-base);
+}
+
+.admin-shell__main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Coming soon placeholder */
+.coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+  text-align: center;
+}
+
+.coming-soon__icon {
+  font-size: 2.5rem;
+  color: var(--text-muted);
+}
+
+.coming-soon__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.coming-soon__sub {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  max-width: 320px;
+}

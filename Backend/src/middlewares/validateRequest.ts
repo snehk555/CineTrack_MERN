@@ -20,7 +20,12 @@ export const validateQuery = (schema: ZodSchema) => {
       next(result.error);
       return;
     }
-    req.query = result.data as Record<string, string>;
+    
+    for (const key in req.query) {
+      delete req.query[key];
+    }
+    Object.assign(req.query, result.data);
+    
     next();
   };
 };
@@ -32,7 +37,12 @@ export const validateParams = (schema: ZodSchema) => {
       next(result.error);
       return;
     }
-    req.params = result.data as Record<string, string>;
+    
+    for (const key in req.params) {
+      delete req.params[key];
+    }
+    Object.assign(req.params, result.data);
+    
     next();
   };
 };

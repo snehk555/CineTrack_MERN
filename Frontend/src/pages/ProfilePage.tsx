@@ -13,7 +13,7 @@ import type { User } from '../types';
 const planBadge: Record<string, { label: string; color: string }> = {
   free: { label: 'Free', color: 'bg-slate-500/30 text-slate-300 border-slate-500/30' },
   pro: { label: 'Pro', color: 'bg-blue-500/30 text-blue-300 border-blue-500/30' },
-  premium: { label: 'Premium', color: 'bg-violet-500/30 text-violet-300 border-violet-500/30' },
+  premium: { label: 'Premium', color: 'bg-amber-500/30 text-amber-300 border-amber-500/30' },
 };
 
 export default function ProfilePage() {
@@ -54,12 +54,12 @@ export default function ProfilePage() {
   const badge = planBadge[plan];
 
   return (
-    <div className="min-h-screen bg-[#09090f]">
+    <div className="min-h-screen bg-[#09090b]">
       <div className="max-w-3xl mx-auto px-6 py-10">
 
         {/* Header */}
         <div className="flex items-center gap-5 mb-8 p-6 bg-white/5 border border-white/8 rounded-2xl">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white text-3xl font-bold flex items-center justify-center shadow-lg shadow-violet-500/30">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-zinc-600 text-white text-3xl font-bold flex items-center justify-center shadow-lg shadow-amber-500/30">
             {user?.name.charAt(0).toUpperCase()}
           </div>
           <div>
@@ -73,12 +73,12 @@ export default function ProfilePage() {
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 bg-white/5 border border-white/8 rounded-xl p-1">
-          {(['profile', 'password', 'subscription'] as const).map((tab) => (
+          {(user?.googleId ? ['profile', 'subscription'] : ['profile', 'password', 'subscription']).map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(tab as 'profile' | 'password' | 'subscription')}
               className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all duration-200 capitalize ${
-                activeTab === tab ? 'bg-violet-600 text-white' : 'text-slate-400 hover:text-white'
+                activeTab === tab ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
               {tab}
@@ -98,7 +98,7 @@ export default function ProfilePage() {
                 <textarea
                   rows={3}
                   placeholder="Tell us about yourself..."
-                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-100 text-sm outline-none focus:border-violet-500 transition-colors resize-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-100 text-sm outline-none focus:border-amber-500 transition-colors resize-none"
                   {...profileForm.register('bio')}
                 />
                 {profileForm.formState.errors.bio && (
@@ -111,7 +111,7 @@ export default function ProfilePage() {
         )}
 
         {/* Tab: Password */}
-        {activeTab === 'password' && (
+        {activeTab === 'password' && !user?.googleId && (
           <div className="bg-white/5 border border-white/8 rounded-2xl p-6">
             <h2 className="text-lg font-semibold text-white mb-5">Change Password</h2>
             <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="flex flex-col gap-4">

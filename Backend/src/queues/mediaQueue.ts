@@ -21,7 +21,8 @@ export type MediaJobData =
   | { type: 'process-video'; payload: ProcessVideoJob }
   | { type: 'cleanup-old-media'; payload: CleanupMediaJob };
 
-export const mediaQueue = new Queue<MediaJobData>('cinetrack:media', {
+export const mediaQueue = new Queue<MediaJobData>('media', {
+  prefix: 'cinetrack',
   connection: redis,
   defaultJobOptions: {
     attempts: 2,

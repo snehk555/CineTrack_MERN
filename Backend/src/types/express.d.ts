@@ -1,12 +1,13 @@
 declare global {
   namespace Express {
+    interface User {
+      id: string;
+      email: string;
+      role: 'user' | 'admin' | 'super_admin' | 'moderator' | 'premium';
+      username?: string;
+      _id?: any;
+    }
     interface Request {
-      user?: {
-        id: string;
-        email: string;
-        role: 'user' | 'admin' | 'moderator' | 'premium';
-        username: string;
-      };
       cachedData?: unknown;
     }
   }

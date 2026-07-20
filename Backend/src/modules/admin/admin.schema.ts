@@ -9,6 +9,15 @@ export const addMovieAdminSchema = addMovieSchema.extend({
   language: z.string().optional(),
   country: z.string().optional(),
   directors: z.array(z.string()).optional(),
+  screenshots: z.array(z.string()).optional(),
+  videoUrl: z.string().optional(),
+  cast: z.array(
+    z.object({
+      name: z.string(),
+      character: z.string(),
+      profilePath: z.string().optional(),
+    })
+  ).optional(),
 });
 
 export const updateMovieStatusSchema = z.object({

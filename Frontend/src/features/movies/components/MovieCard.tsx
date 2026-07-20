@@ -26,7 +26,7 @@ export default function MovieCard({ movie, onClick }: MovieCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative rounded-2xl overflow-hidden cursor-pointer bg-white/5 border border-white/8 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-black/50 hover:border-violet-500/30"
+      className="group relative rounded-2xl overflow-hidden cursor-pointer bg-white/5 border border-white/8 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-black/50 hover:border-amber-500/30"
     >
       {/* Poster */}
       <div className="aspect-[2/3] bg-white/5 relative overflow-hidden">
@@ -57,8 +57,8 @@ export default function MovieCard({ movie, onClick }: MovieCardProps) {
                   w-8 h-8 rounded-full flex items-center justify-center text-sm
                   transition-all duration-200 active:scale-90
                   ${inWatchlist
-                    ? 'bg-violet-500 text-white'
-                    : 'bg-white/20 text-white hover:bg-violet-500/80'}
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-white/20 text-white hover:bg-amber-500/80'}
                 `}
                 aria-label={inWatchlist ? 'Remove from watchlist' : 'Add to watchlist'}
               >

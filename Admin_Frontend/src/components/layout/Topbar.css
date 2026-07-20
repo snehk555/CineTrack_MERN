@@ -1,0 +1,104 @@
+.topbar {
+  height: 60px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.topbar__left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar__app-name {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topbar__admin {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.topbar__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--accent-muted);
+  border: 1.5px solid rgba(245, 158, 11, 0.3);
+  color: var(--accent-text);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.topbar__admin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.topbar__admin-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.topbar__admin-role {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.topbar__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.topbar__logout {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  padding: 0.375rem 0.75rem;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+  white-space: nowrap;
+}
+
+.topbar__logout:hover:not(:disabled) {
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.4);
+  background: var(--danger-muted);
+}
+
+.topbar__logout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

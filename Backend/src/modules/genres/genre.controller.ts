@@ -11,7 +11,7 @@ export const addGenre = catchAsync(async (req: Request, res: Response) => {
 
 export const getGenre = catchAsync(async (_req: Request, res: Response) => {
   const genres = await Genre.find().lean();
-  sendSuccess(res, { genres }, 'Genres fetched');
+  sendSuccess(res, genres, 'Genres fetched');
 });
 
 export const deleteGenre = catchAsync(async (req: Request, res: Response) => {

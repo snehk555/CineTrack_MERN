@@ -27,6 +27,7 @@ export const authService = {
 
     const user = await User.create({
       name: data.name,
+      username: data.username,
       email: data.email,
       password: hashedPassword,
       role: 'user',
@@ -103,7 +104,14 @@ export const authService = {
     const isBlacklisted = await redis.get(`blacklist:${refreshToken}`).catch(() => null);
     if (isBlacklisted) throw new UnauthorizedError('Token has been invalidated');
 
-    const decoded = verifyRefreshToken(refreshToken);
+    let decoded;
+    try {
+      decoded = verifyRefreshToken(refreshToken);
+    } catch (error) {
+      clearAuthCookies(res);
+      throw new UnauthorizedError('Invalid refresh token');
+    }
+
     const user = await User.findById(decoded.userId).lean();
     if (!user) throw new NotFoundError('User');
 

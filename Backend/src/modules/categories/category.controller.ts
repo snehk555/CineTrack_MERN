@@ -11,7 +11,7 @@ export const addCategory = catchAsync(async (req: Request, res: Response) => {
 
 export const getCategories = catchAsync(async (_req: Request, res: Response) => {
   const categories = await Category.find().lean();
-  sendSuccess(res, { categories }, 'Categories fetched');
+  sendSuccess(res, categories, 'Categories fetched');
 });
 
 export const deleteCategory = catchAsync(async (req: Request, res: Response) => {

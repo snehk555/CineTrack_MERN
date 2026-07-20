@@ -13,6 +13,7 @@ export interface IMovie extends Document {
   overview?: string;
   posterPath?: string;
   backdropPath?: string;
+  screenshots?: string[];
   trailerUrl?: string;
   releaseYear?: number;
   runtime?: number;
@@ -46,12 +47,13 @@ const castMemberSchema = new Schema<CastMember>(
 
 const movieSchema = new Schema<IMovie>(
   {
-    tmdbId: { type: Number, required: true, unique: true },
+    tmdbId: { type: Number, required: true },
     title: { type: String, required: true, trim: true, maxlength: 200 },
-    slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    slug: { type: String, required: true, lowercase: true, trim: true },
     overview: { type: String },
     posterPath: { type: String },
     backdropPath: { type: String },
+    screenshots: [{ type: String }],
     trailerUrl: { type: String },
     releaseYear: { type: Number, min: 1900 },
     runtime: { type: Number, min: 1 },

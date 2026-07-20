@@ -1,18 +1,12 @@
 import rateLimit from 'express-rate-limit';
 import { Request } from 'express';
 
-const keyGenerator = (req: Request): string => {
-  const userId = req.user?.id ?? 'anonymous';
-  const ip = req.ip ?? 'unknown';
-  return `${ip}:${userId}`;
-};
 
 export const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator,
   message: {
     success: false,
     message: 'Too many attempts. Try again after 15 minutes.',
@@ -25,7 +19,6 @@ export const publicRateLimiter = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator,
   message: {
     success: false,
     message: 'Too many requests. Please slow down.',
@@ -38,7 +31,6 @@ export const apiRateLimiter = rateLimit({
   max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator,
   message: {
     success: false,
     message: 'Too many requests. Please slow down.',

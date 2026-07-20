@@ -1,0 +1,92 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition),
+    border-color var(--transition), opacity var(--transition), transform var(--transition);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.btn--sm  { padding: 0.375rem 0.75rem;  font-size: 0.75rem;  }
+.btn--md  { padding: 0.5rem  1.25rem;   font-size: 0.875rem; }
+.btn--lg  { padding: 0.75rem 1.75rem;   font-size: 0.9375rem; letter-spacing: 0.01em; }
+
+/* Full width */
+.btn--full { width: 100%; }
+
+/* Variants */
+.btn--primary {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+.btn--ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.btn--outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+.btn--outline:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-focus);
+}
+
+.btn--danger {
+  background: var(--danger-muted);
+  color: var(--danger);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.btn--danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* Spinner */
+.btn__spinner {
+  width: 1em;
+  height: 1em;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn__text--loading {
+  opacity: 0.7;
+}

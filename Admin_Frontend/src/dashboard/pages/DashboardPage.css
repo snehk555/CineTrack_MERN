@@ -1,0 +1,145 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.dashboard__header { display: flex; align-items: baseline; gap: 0.75rem; }
+.dashboard__title  { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em; }
+.dashboard__subtitle { font-size: 0.8125rem; color: var(--text-muted); }
+
+/* ── KPI Grid ────────────────────────────────────────────────── */
+.dashboard__kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.kpi-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: border-color var(--transition);
+}
+.kpi-card:hover { border-color: var(--border-strong); }
+
+.kpi-card__top { display: flex; align-items: center; gap: 0.5rem; }
+.kpi-card__icon  { font-size: 0.875rem; color: var(--accent); }
+.kpi-card__label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+.kpi-card__value {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.kpi-card__delta {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.kpi-card__delta--up   { color: var(--success); }
+.kpi-card__delta--down { color: var(--danger); }
+
+.kpi-card__skeleton {
+  height: 2.5rem;
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── Charts Row ─────────────────────────────────────────────── */
+.dashboard__charts-row {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1rem;
+}
+
+.dashboard__chart-card,
+.dashboard__activity-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+.dashboard__chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.dashboard__chart-header h3 { font-size: 0.9375rem; font-weight: 600; }
+
+/* Day toggle */
+.dashboard__day-toggle { display: flex; gap: 4px; }
+.day-btn {
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.day-btn:hover     { background: var(--bg-hover); color: var(--text-primary); }
+.day-btn--active   { background: var(--accent-muted); color: var(--accent-text); border-color: rgba(245,158,11,0.3); }
+
+.dashboard__chart-skeleton {
+  height: 220px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── Activity ─────────────────────────────────────────────────── */
+.dashboard__activity-title { font-size: 0.9375rem; font-weight: 600; margin-bottom: 1rem; }
+
+.activity-list { list-style: none; display: flex; flex-direction: column; gap: 0.625rem; }
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: background var(--transition), border-color var(--transition);
+}
+.activity-item:hover {
+  background: var(--bg-hover);
+  border-color: var(--border);
+}
+
+.action-badge   { font-size: 0.6875rem; font-weight: 600; white-space: nowrap; }
+.activity-item__admin  { color: var(--text-secondary); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-item__target { color: var(--text-muted); white-space: nowrap; }
+.activity-item__time   { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.6875rem; flex-shrink: 0; }
+.activity-item--empty  { color: var(--text-muted); justify-content: center; }
+
+.dashboard__activity-skeleton {
+  height: 200px;
+  background: var(--bg-hover);
+  border-radius: var(--radius-md);
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── Shimmer animation ─────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 1;   }
+  100% { opacity: 0.6; }
+}
+
+@media (max-width: 1100px) {
+  .dashboard__kpi-grid    { grid-template-columns: repeat(2, 1fr); }
+  .dashboard__charts-row  { grid-template-columns: 1fr; }
+}

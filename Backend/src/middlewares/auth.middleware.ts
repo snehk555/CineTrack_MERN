@@ -38,6 +38,17 @@ export const protect = catchAsync(async (req: Request, _res: Response, next: Nex
     throw new UnauthorizedError('User no longer exists');
   }
 
+  // Per-request ban check — takes effect instantly (no JWT reissue needed)
+  if (user.isBanned) {
+    throw new UnauthorizedError('Your account has been banned. Contact support.');
+  }
+
+  // Per-request suspension check — auto-lifts when date passes (no cron needed)
+  if (user.suspendedUntil && user.suspendedUntil > new Date()) {
+    const until = user.suspendedUntil.toISOString();
+    throw new UnauthorizedError(`Your account is suspended until ${until}.`);
+  }
+
   req.user = {
     id: (user._id as { toString(): string }).toString(),
     email: user.email,

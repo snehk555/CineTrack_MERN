@@ -23,7 +23,8 @@ export type EmailJobData =
   | { type: 'password-reset'; payload: PasswordResetEmailJob }
   | { type: 'weekly-digest'; payload: WeeklyDigestEmailJob };
 
-export const emailQueue = new Queue<EmailJobData>('cinetrack:emails', {
+export const emailQueue = new Queue<EmailJobData>('emails', {
+  prefix: 'cinetrack',
   connection: redis,
   defaultJobOptions: {
     attempts: 3,

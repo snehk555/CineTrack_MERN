@@ -44,8 +44,8 @@ export const useMovieDetail = (id: string) => {
   return useQuery({
     queryKey: movieKeys.detail(id),
     queryFn: async () => {
-      const { data } = await apiClient.get<ApiResponse<Movie>>(`/v1/movies/${id}`);
-      return data.data;
+      const { data } = await apiClient.get<ApiResponse<{ movie: Movie }>>(`/v1/movies/${id}`);
+      return data.data.movie;
     },
     enabled: !!id,
     initialData: () => {

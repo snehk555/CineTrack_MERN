@@ -112,11 +112,11 @@ const SearchBar: React.FC<SearchBarProps> = ({ selectedCategory, selectedGenre, 
                     placeholder="🔍 Search for a movie..."
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
-                    className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-100 text-sm font-[var(--font-outfit)] outline-none w-[280px] transition-all duration-300 focus:border-violet-500 focus:shadow-[0_0_12px_rgba(139,92,246,0.25)]"
+                    className="px-4 py-2.5 rounded-xl border border-white/10 bg-white/5 text-slate-100 text-sm font-[var(--font-outfit)] outline-none w-[280px] transition-all duration-300 focus:border-amber-500 focus:shadow-[0_0_12px_rgba(139,92,246,0.25)]"
                     onFocus={() => setIsDropdownOpen(true)}
                 />
                 <button
-                    className="bg-violet-600 text-white border-none px-6 py-2.5 rounded-lg font-[var(--font-outfit)] font-medium text-sm cursor-pointer transition-all duration-300 hover:bg-violet-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-violet-500/30"
+                    className="bg-amber-600 text-white border-none px-6 py-2.5 rounded-lg font-[var(--font-outfit)] font-medium text-sm cursor-pointer transition-all duration-300 hover:bg-amber-700 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/30"
                     onClick={handleAddMovie}
                 >
                     + Add
@@ -136,7 +136,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ selectedCategory, selectedGenre, 
                     {searchResults.slice(0, 5).map((movie) => (
                         <div
                             key={movie.id}
-                            className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-violet-500/20"
+                            className="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all duration-200 hover:bg-amber-500/20"
                             onClick={() => handleSelectMovie(movie)}
                         >
                             {movie.poster_path ? (

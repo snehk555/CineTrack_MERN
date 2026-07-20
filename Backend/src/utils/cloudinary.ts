@@ -37,7 +37,8 @@ const uploadFromBuffer = (
 export const uploadImage = async (
   buffer: Buffer,
   folder: string,
-  publicId?: string
+  publicId?: string,
+  customOptions?: Record<string, unknown>
 ): Promise<UploadResult> => {
   const options: Record<string, unknown> = {
     resource_type: 'image',
@@ -45,6 +46,7 @@ export const uploadImage = async (
     format: 'webp',
     width: 500,
     crop: 'limit',
+    ...customOptions,
   };
   if (publicId) options.public_id = publicId;
 

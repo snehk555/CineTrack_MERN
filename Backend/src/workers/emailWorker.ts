@@ -52,9 +52,10 @@ const processEmailJob = async (job: Job<EmailJobData>) => {
 };
 
 export const emailWorker = new Worker<EmailJobData>(
-  'cinetrack:emails',
+  'emails',
   processEmailJob,
   {
+    prefix: 'cinetrack',
     connection: redis,
     concurrency: 5,
   }

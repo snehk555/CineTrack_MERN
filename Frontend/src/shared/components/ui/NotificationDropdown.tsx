@@ -72,7 +72,7 @@ export default function NotificationDropdown() {
       >
         🔔
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-violet-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-amber-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -91,7 +91,7 @@ export default function NotificationDropdown() {
               {unreadCount === 0 && notifications && notifications.length > 0 && (
                 <button
                   onClick={() => markAllRead()}
-                  className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                  className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
                 >
                   Mark all read
                 </button>
@@ -111,7 +111,7 @@ export default function NotificationDropdown() {
                     key={n._id}
                     onClick={() => handleNotificationClick(n)}
                     className={`w-full flex items-start gap-3 px-4 py-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors text-left ${
-                      !n.read ? 'bg-violet-500/5' : ''
+                      !n.read ? 'bg-amber-500/5' : ''
                     }`}
                   >
                     <span className="text-lg shrink-0 mt-0.5">{TYPE_ICON[n.type] ?? '🔔'}</span>
@@ -120,7 +120,7 @@ export default function NotificationDropdown() {
                       <p className="text-slate-500 text-[11px] mt-0.5">{timeAgo(n.createdAt)}</p>
                     </div>
                     {!n.read && (
-                      <div className="w-2 h-2 rounded-full bg-violet-400 shrink-0 mt-1.5" />
+                      <div className="w-2 h-2 rounded-full bg-amber-400 shrink-0 mt-1.5" />
                     )}
                   </button>
                 ))

@@ -1,0 +1,102 @@
+.step5-video {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.video-upload-header {
+  margin-bottom: 8px;
+}
+
+.upload-dropzone {
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 40px;
+}
+
+.upload-dropzone:hover, .upload-dropzone.dragging {
+  border-color: var(--primary, #7c3aed);
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.upload-dropzone.uploading-state {
+  cursor: default;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dropzone-content, .upload-progress-container, .upload-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.upload-icon.pulse {
+  animation: pulse 1.5s infinite;
+}
+
+.upload-icon.success {
+  color: #10b981;
+  opacity: 1;
+}
+
+.dropzone-content h4, .upload-progress-container h4, .upload-success h4 {
+  font-size: 1.25rem;
+  color: #fff;
+  margin: 0 0 8px 0;
+}
+
+.dropzone-content p, .upload-success p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0 0 24px 0;
+  max-width: 400px;
+}
+
+.browse-btn {
+  pointer-events: none; /* Let parent handle click */
+}
+
+.video-progress-bar {
+  width: 100%;
+  max-width: 400px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  margin: 24px 0 12px;
+  overflow: hidden;
+}
+
+.video-progress-fill {
+  height: 100%;
+  background: var(--primary, #7c3aed);
+  transition: width 0.2s linear;
+}
+
+.progress-text {
+  font-family: monospace;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}

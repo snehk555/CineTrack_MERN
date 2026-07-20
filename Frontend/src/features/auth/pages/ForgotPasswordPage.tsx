@@ -27,11 +27,11 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090f] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#09090b] px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-1">
-            🎬 <span className="text-violet-400">CineTrack</span>
+            🎬 <span className="text-amber-400">CineTrack</span>
           </h1>
         </div>
 
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
               <p className="text-slate-400 text-sm mb-6">
                 We've sent password reset instructions to your email address.
               </p>
-              <Link to="/login" className="text-violet-400 hover:text-violet-300 text-sm font-medium">
+              <Link to="/login" className="text-amber-400 hover:text-amber-300 text-sm font-medium">
                 ← Back to login
               </Link>
             </div>
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
               </form>
 
               <p className="text-center text-sm text-slate-400 mt-6">
-                <Link to="/login" className="text-violet-400 hover:text-violet-300 transition-colors">
+                <Link to="/login" className="text-amber-400 hover:text-amber-300 transition-colors">
                   ← Back to login
                 </Link>
               </p>

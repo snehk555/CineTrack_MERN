@@ -34,7 +34,7 @@ export default function MoviesPage() {
   const allMovies = data?.pages.flatMap((p) => p.data) ?? [];
 
   return (
-    <div className="min-h-screen bg-[#09090f]">
+    <div className="min-h-screen bg-[#09090b]">
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Header */}
@@ -48,7 +48,7 @@ export default function MoviesPage() {
           {(filters.category || filters.genre || filters.search) && (
             <button
               onClick={() => dispatch(resetFilters())}
-              className="text-sm text-violet-400 hover:text-violet-300 border border-violet-500/30 px-3 py-1.5 rounded-lg transition-colors"
+              className="text-sm text-amber-400 hover:text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg transition-colors"
             >
               Reset filters
             </button>
@@ -60,7 +60,7 @@ export default function MoviesPage() {
           <select
             value={filters.category}
             onChange={(e) => dispatch(setCategory(e.target.value))}
-            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-violet-500 transition-colors"
+            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-amber-500 transition-colors"
           >
             <option value="">All Categories</option>
             {categories?.map((c: { _id: string; name: string }) => (
@@ -71,7 +71,7 @@ export default function MoviesPage() {
           <select
             value={filters.genre}
             onChange={(e) => dispatch(setGenre(e.target.value))}
-            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-violet-500 transition-colors"
+            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-amber-500 transition-colors"
           >
             <option value="">All Genres</option>
             {genres?.map((g: { _id: string; name: string }) => (
@@ -86,7 +86,7 @@ export default function MoviesPage() {
               dispatch(setSortBy(field));
               dispatch(setOrder(ord));
             }}
-            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-violet-500 transition-colors"
+            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-amber-500 transition-colors"
           >
             <option value="createdAt-desc">Newest First</option>
             <option value="rating-desc">Highest Rated</option>
@@ -128,7 +128,7 @@ export default function MoviesPage() {
           {isFetchingNextPage && (
             <div className="flex gap-1">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="w-2 h-2 bg-violet-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                <div key={i} className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
               ))}
             </div>
           )}

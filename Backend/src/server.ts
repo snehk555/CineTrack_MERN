@@ -37,7 +37,6 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 const startServer = async () => {
   await connectDB();
-  await redis.connect();
 
   httpServer.listen(PORT, () => {
     logger.info(`Server running on port ${PORT} [${env.NODE_ENV}]`);

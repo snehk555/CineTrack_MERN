@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { catchAsync } from '../../middlewares/catchAsync.js';
 import { sendSuccess, sendCreated } from '../../utils/apiResponse.js';
 import { authService } from './auth.service.js';
+import { generateAccessToken, generateRefreshToken, setAuthCookies } from '../../utils/tokenUtils.js';
+import { env } from '../../config/env.js';
 
 export const signUp = catchAsync(async (req: Request, res: Response) => {
   const result = await authService.register(req.body, res);
@@ -28,4 +30,16 @@ export const refreshToken = catchAsync(async (req: Request, res: Response) => {
 export const getMe = catchAsync(async (req: Request, res: Response) => {
   const user = await authService.getMe(req.user!.id);
   sendSuccess(res, { user }, 'User profile fetched');
+});
+
+export const googleCallback = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as any;
+  const payload = { userId: user._id.toString(), role: user.role, email: user.email };
+  
+  const accessToken = generateAccessToken(payload);
+  const refreshToken = generateRefreshToken(payload);
+
+  setAuthCookies(res, accessToken, refreshToken);
+  
+  res.redirect(`${env.FRONTEND_URL}/`);
 });

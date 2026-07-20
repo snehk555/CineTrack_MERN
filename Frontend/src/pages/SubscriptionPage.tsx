@@ -28,7 +28,7 @@ const plans = [
     name: 'Premium',
     price: '₹499',
     period: '/month',
-    color: 'border-violet-500/60',
+    color: 'border-amber-500/60',
     badge: '👑 Best Value',
     features: ['Everything in Pro', '4K Ultra HD', 'Early access', 'Download offline', 'Family sharing (5 users)', 'Exclusive content'],
     cta: 'Upgrade to Premium',
@@ -47,7 +47,7 @@ export default function SubscriptionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090f]">
+    <div className="min-h-screen bg-[#09090b]">
       <div className="max-w-5xl mx-auto px-6 py-14">
 
         {/* Header */}
@@ -63,10 +63,10 @@ export default function SubscriptionPage() {
             return (
               <div
                 key={p.name}
-                className={`relative bg-white/5 border-2 rounded-2xl p-7 flex flex-col transition-all duration-300 hover:scale-[1.02] ${p.color} ${isCurrent ? 'ring-2 ring-violet-500/50' : ''}`}
+                className={`relative bg-white/5 border-2 rounded-2xl p-7 flex flex-col transition-all duration-300 hover:scale-[1.02] ${p.color} ${isCurrent ? 'ring-2 ring-amber-500/50' : ''}`}
               >
                 {p.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-violet-600 text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
                     {p.badge}
                   </div>
                 )}
@@ -100,7 +100,7 @@ export default function SubscriptionPage() {
                     isCurrent
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
                       : p.plan === 'premium'
-                      ? 'bg-violet-600 hover:bg-violet-700 text-white active:scale-95'
+                      ? 'bg-amber-600 hover:bg-amber-700 text-white active:scale-95'
                       : 'bg-white/10 hover:bg-white/15 text-white border border-white/10 active:scale-95'
                   }`}
                 >

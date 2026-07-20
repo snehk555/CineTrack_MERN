@@ -18,14 +18,14 @@ export default function Navbar() {
   }, [searchInput, dispatch]);
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#09090f]/90 backdrop-blur-xl border-b border-white/8">
+    <nav className="sticky top-0 z-50 bg-[#09090b]/90 backdrop-blur-xl border-b border-white/8">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
 
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0">
           <span className="text-2xl">🎬</span>
           <span className="text-white font-bold text-lg">
-            Cine<span className="text-violet-400">Track</span>
+            Cine<span className="text-amber-400">Track</span>
           </span>
         </Link>
 
@@ -37,7 +37,7 @@ export default function Navbar() {
               placeholder="Search movies..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 outline-none focus:border-violet-500 transition-colors"
+              className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 outline-none focus:border-amber-500 transition-colors"
             />
           </div>
         )}
@@ -60,7 +60,7 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setProfileOpen((p) => !p)}
-                  className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 text-white font-bold text-sm flex items-center justify-center border-2 border-violet-500/50 hover:scale-110 transition-transform"
+                  className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-zinc-600 text-white font-bold text-sm flex items-center justify-center border-2 border-amber-500/50 hover:scale-110 transition-transform"
                 >
                   {user?.name.charAt(0).toUpperCase()}
                 </button>
@@ -79,7 +79,7 @@ export default function Navbar() {
                         👤 Profile
                       </Link>
                       {user?.role === 'admin' && (
-                        <Link to="/admin" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-violet-300 hover:bg-white/5 transition-colors">
+                        <Link to="/admin" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-amber-300 hover:bg-white/5 transition-colors">
                           ⚙️ Admin Panel
                         </Link>
                       )}
@@ -97,7 +97,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link to="/login" className="text-sm text-slate-400 hover:text-white transition-colors">Sign In</Link>
-              <Link to="/register" className="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl transition-colors">
+              <Link to="/register" className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-xl transition-colors">
                 Get Started
               </Link>
             </>

@@ -4,14 +4,12 @@ import authReducer from './slices/authSlice';
 import uiReducer from './slices/uiSlice';
 import filtersReducer from './slices/filtersSlice';
 import watchlistReducer from './slices/watchlistSlice';
-import adminReducer from './slices/adminSlice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
   ui: uiReducer,
   filters: filtersReducer,
   watchlist: watchlistReducer,
-  admin: adminReducer,
 });
 
 export const store = configureStore({
@@ -31,4 +29,4 @@ export { setUser, clearUser, setAuthLoading, updateUserField, initializeAuth } f
 export { toggleSidebar, setSidebarOpen, setTheme, incrementUnread, setUnreadCount, clearUnread, setGlobalLoading } from './slices/uiSlice';
 export { setSearch, setCategory, setGenre, setSortBy, setOrder, setPage, resetFilters } from './slices/filtersSlice';
 export { setWatchlistIds, addToWatchlistLocal, removeFromWatchlistLocal, clearWatchlist } from './slices/watchlistSlice';
-export { setSelectedUser, setSelectedMovie } from './slices/adminSlice';
+
