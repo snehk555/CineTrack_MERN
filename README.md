@@ -1,29 +1,70 @@
-# 🎬 CineTrack — Advanced Movie Tracking & Management SaaS
+# CineTrack
 
-CineTrack is a full-stack movie tracking application built with the MERN stack. It features a scalable RESTful API backend, a dynamic React frontend, and an optimized user experience.
+Enterprise-grade movie tracking and streaming platform built with the MERN stack.
 
-## 🚀 Tech Stack
-- **Frontend:** React.js, Zustand (Global State Management), React Router, HTML5/CSS3
-- **Backend:** Node.js, Express.js
-- **Database:** MongoDB, Mongoose ODM
-- **External API:** TMDB API
-- **Security:** JWT Authentication, HttpOnly Cookies, Role-Based Access Control (RBAC)
+## Architecture
 
-## ✨ Key Features
-- **Intelligent Search:** Highly optimized live autocomplete search system using the TMDB API with custom debouncing (500ms delay) to minimize API calls.
-- **Robust Database Schema:** Dynamic reference models (ObjectIds) in MongoDB establishing efficient one-to-many data relationships for Categories and Genres.
-- **Secure Authentication:** JWT-based authentication combined with Role-Based Access Control (RBAC). 
-- **Modern SPA Architecture:** Protected routing, dynamic URL parameters, and smooth client-side navigation using React Router.
-- **Optimized UI/UX:** Features skeleton loaders during data fetching and advanced event delegation to prevent bubbling bugs.
+- **Frontend (Consumer)**: React (Vite), Redux Toolkit, React Query, Tailwind CSS
+- **Frontend (Admin)**: React (Vite), React Hook Form, Zod, Tailwind CSS
+- **Backend**: Node.js, Express, TypeScript
+- **Database**: MongoDB (Mongoose), Redis (BullMQ)
+- **Media Pipeline**: FFmpeg, Cloudinary
 
-## ⚙️ Installation & Setup
+## Core Features
 
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/snehk555/CineTrack_MERN.git
+### Consumer App
+- Browse and filter movies by categories and genres.
+- Movie detail pages with actor cast, screenshots, and trailers.
+- Netflix-style HLS video playback support.
+- User reviews, ratings, and watchlist management.
+- Google OAuth and JWT-based authentication.
 
-## ⚙️ How to Run Locally
-1. **Install Backend Dependencies:**
-   Navigate to the Backend folder and run `npm install`. Add your `.env` variables (PORT, MONGO_URI, JWT_SECRET). Start the server with `npm run dev`.
-2. **Install Frontend Dependencies:**
-   Navigate to the Frontend folder and run `npm install`. Start the client with `npm run dev`.
+### Admin Portal
+- Advanced 6-step movie creation wizard with direct TMDB integration.
+- Background video processing queue (BullMQ + Redis).
+- User management, role-based access control (RBAC), and review moderation.
+- System health monitoring, audit logs, and feature flag toggles.
+
+## Local Development Setup
+
+### Prerequisites
+- Node.js (v18+)
+- MongoDB running locally or via Atlas
+- Redis running locally (required for BullMQ)
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/snehk555/CineTrack_MERN.git
+cd CineTrack_MERN
+```
+
+### 2. Environment Variables
+Create `.env` files in `Backend`, `Frontend`, and `Admin_Frontend`. 
+Use the `.env.example` templates in each folder to fill in the required keys (MongoDB URI, JWT Secret, TMDB API Key, Cloudinary config).
+
+### 3. Run the Services
+You need three separate terminal windows to run the full stack:
+
+**Terminal 1 (Backend API):**
+```bash
+cd Backend
+npm install
+npm run dev
+```
+
+**Terminal 2 (Consumer App):**
+```bash
+cd Frontend
+npm install
+npm run dev
+```
+
+**Terminal 3 (Admin App):**
+```bash
+cd Admin_Frontend
+npm install
+npm run dev
+```
+
+## Licensing
+Proprietary software. All rights reserved.
