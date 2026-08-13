@@ -10,6 +10,7 @@ const Step1BasicInfo = () => {
   const { register, watch, setValue, formState: { errors } } = useFormContext();
   const [tmdbSearch, setTmdbSearch] = useState('');
   const [selectedTmdbId, setSelectedTmdbId] = useState<number | null>(null);
+  const [selectedMediaType, setSelectedMediaType] = useState<'movie' | 'tv' | undefined>(undefined);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
   
@@ -18,8 +19,8 @@ const Step1BasicInfo = () => {
   const debouncedTitle = useDebounce(currentTitle, 500);
 
   // Queries
-  const { data: searchResults, isFetching: isSearching } = useTmdbSearch(debouncedTmdbSearch);
-  const { data: tmdbDetails, isFetching: isFetchingDetails } = useTmdbDetail(selectedTmdbId);
+  const { data: searchResults, isFetching: isSearching } = useTmdbSearch(debouncedTmdbSearch, 'movie');
+  const { data: tmdbDetails, isFetching: isFetchingDetails } = useTmdbDetail(selectedTmdbId, selectedMediaType);
   const { data: duplicates } = useDuplicateCheck(debouncedTitle);
   const { data: genresData } = useGenresList();
 
@@ -41,21 +42,30 @@ const Step1BasicInfo = () => {
     if (tmdbDetails?.success && tmdbDetails.data) {
       const d = tmdbDetails.data;
       setValue('title', d.title, { shouldValidate: true });
-      setValue('description', d.overview, { shouldValidate: true });
+      setValue('overview', d.overview, { shouldValidate: true });
       if (d.releaseYear) {
         setValue('releaseYear', d.releaseYear, { shouldValidate: true });
       }
       if (d.runtime) {
-        setValue('duration', d.runtime, { shouldValidate: true });
+        setValue('runtime', d.runtime, { shouldValidate: true });
       }
-      if (d.language) {
+      if (d.averageRating) {
+        setValue('averageRating', d.averageRating, { shouldValidate: true });
+      }
+      if (d.totalRatings) {
+        setValue('totalRatings', d.totalRatings);
+      }
+      if (d.spokenLanguage) {
         const langMap: Record<string, string> = { en: 'English', hi: 'Hindi', ta: 'Tamil', te: 'Telugu', mr: 'Marathi' };
-        setValue('language', langMap[d.language] || 'English', { shouldValidate: true });
+        setValue('spokenLanguage', langMap[d.spokenLanguage] || 'English', { shouldValidate: true });
       }
       if (d.posterPath) setValue('posterPath', d.posterPath);
       if (d.backdropPath) setValue('bannerPath', d.backdropPath);
       if (d.trailerUrl) setValue('trailerUrl', d.trailerUrl);
       setValue('tmdbId', d.tmdbId);
+      
+      // Auto-fill newly added fields
+      if (d.contentRating) setValue('contentRating', d.contentRating, { shouldValidate: true });
       
       // Cast & Crew Auto-fill
       if (d.directors && d.directors.length > 0) {
@@ -64,7 +74,8 @@ const Step1BasicInfo = () => {
       if (d.cast && d.cast.length > 0) {
         const topCast = d.cast.slice(0, 10).map((actor: any) => ({
           name: actor.name,
-          role: actor.character || 'Unknown'
+          role: actor.character || 'Unknown',
+          profilePath: actor.profilePath || '',
         }));
         setValue('actors', topCast, { shouldValidate: true });
       }
@@ -73,7 +84,10 @@ const Step1BasicInfo = () => {
       if (d.genres && d.genres.length > 0 && genresData?.data) {
         const tmdbGenreNames = d.genres.map((g: any) => g.name.toLowerCase());
         const matchedDbGenreIds = genresData.data
-          .filter((dbGenre: any) => tmdbGenreNames.includes(dbGenre.name.toLowerCase()))
+          .filter((dbGenre: any) => {
+            const dbName = dbGenre.name.toLowerCase();
+            return tmdbGenreNames.some((tmdbName: string) => tmdbName.includes(dbName) || dbName.includes(tmdbName));
+          })
           .map((dbGenre: any) => dbGenre._id);
         
         if (matchedDbGenreIds.length > 0) {
@@ -114,6 +128,7 @@ const Step1BasicInfo = () => {
                   className="tmdb-result-item"
                   onClick={() => {
                     setSelectedTmdbId(movie.tmdbId);
+                    setSelectedMediaType(movie.mediaType);
                   }}
                 >
                   {movie.posterPath ? (
@@ -124,7 +139,7 @@ const Step1BasicInfo = () => {
                   )}
                   <div className="tmdb-result-info">
                     <h4>{movie.title}</h4>
-                    <span>{movie.releaseYear || 'N/A'}</span>
+                    <span>{movie.releaseYear || 'N/A'} • {movie.mediaType === 'tv' ? '📺 TV Show' : '🎬 Movie'}</span>
                   </div>
                 </div>
               ))}
@@ -164,23 +179,30 @@ const Step1BasicInfo = () => {
             error={errors.releaseYear?.message as string} 
           />
           <Input 
-            label="Duration (mins) *" 
+            label="Runtime (mins) *" 
             type="number" 
-            {...register('duration', { valueAsNumber: true })} 
-            error={errors.duration?.message as string} 
+            {...register('runtime', { valueAsNumber: true })} 
+            error={errors.runtime?.message as string} 
+          />
+          <Input 
+            label="TMDB Rating" 
+            type="number" 
+            step="0.1"
+            {...register('averageRating', { valueAsNumber: true })} 
+            error={errors.averageRating?.message as string} 
           />
         </div>
 
         <Textarea 
-          label="Description *" 
-          {...register('description')} 
-          error={errors.description?.message as string} 
+          label="Overview *" 
+          {...register('overview')} 
+          error={errors.overview?.message as string} 
         />
 
-        <div className="form-row triple-row">
+        <div className="form-row">
           <div className="input-group">
             <label className="input-label">Language *</label>
-            <select className="input-field" {...register('language')}>
+            <select className="input-field" {...register('spokenLanguage')}>
               <option value="English">English</option>
               <option value="Hindi">Hindi</option>
               <option value="Tamil">Tamil</option>
@@ -188,7 +210,7 @@ const Step1BasicInfo = () => {
               <option value="Malayalam">Malayalam</option>
               <option value="Korean">Korean</option>
             </select>
-            {errors.language && <span className="input-error">{errors.language.message as string}</span>}
+            {errors.spokenLanguage && <span className="input-error">{errors.spokenLanguage.message as string}</span>}
           </div>
 
           <div className="input-group">
@@ -201,25 +223,7 @@ const Step1BasicInfo = () => {
             {errors.contentRating && <span className="input-error">{errors.contentRating.message as string}</span>}
           </div>
 
-          <div className="input-group">
-            <label className="input-label">Type *</label>
-            <select className="input-field" {...register('type')}>
-              <option value="Movie">Movie</option>
-              <option value="Web Series">Web Series</option>
-            </select>
-            {errors.type && <span className="input-error">{errors.type.message as string}</span>}
-          </div>
         </div>
-
-        {/* Season Count only if Web Series */}
-        {watch('type') === 'Web Series' && (
-          <Input 
-            label="Season Count" 
-            type="number" 
-            {...register('seasonCount', { valueAsNumber: true })} 
-            error={errors.seasonCount?.message as string} 
-          />
-        )}
       </div>
 
       {isFetchingDetails && (

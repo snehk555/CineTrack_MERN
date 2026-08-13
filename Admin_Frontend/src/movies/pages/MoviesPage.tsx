@@ -130,28 +130,7 @@ const MoviesPage = () => {
       cell: info => <StatusBadge status={info.getValue()} />,
       size: 110,
     }),
-    col.accessor('genreIds', {
-      header: 'Genres',
-      cell: info => (
-        <div className="genre-badges">
-          {info.getValue().slice(0, 2).map(g => (
-            <span key={g._id} className="genre-mini-badge" style={{ color: g.color, borderColor: `${g.color}40` }}>{g.name}</span>
-          ))}
-          {info.getValue().length > 2 && <span className="genre-mini-badge">+{info.getValue().length - 2}</span>}
-        </div>
-      ),
-      size: 160,
-    }),
-    col.accessor('averageRating', {
-      header: 'Rating',
-      cell: info => <span className="mono-text">★ {info.getValue().toFixed(1)}</span>,
-      size: 80,
-    }),
-    col.accessor('totalWatchlists', {
-      header: 'Watchlists',
-      cell: info => <span className="mono-text">{info.getValue().toLocaleString()}</span>,
-      size: 100,
-    }),
+
     col.accessor('isFeatured', {
       header: 'Featured',
       cell: info => (

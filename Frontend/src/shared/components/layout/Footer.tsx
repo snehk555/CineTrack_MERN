@@ -2,52 +2,36 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const links = [
+    { to: '/contact', label: 'Contact Us' },
+    { to: '/request', label: 'Request Us' },
+    { to: '/dmca', label: 'DMCA' },
+    { to: '/about', label: 'About Us' },
+    { to: '/sitemap', label: 'Sitemap' },
+  ];
 
   return (
-    <footer className="border-t border-white/8 bg-[#09090b] mt-auto">
-      <div className="max-w-7xl mx-auto px-6 py-10">
+    <footer className="ct-footer">
+      <div className="ct-footer-inner">
+        <Link to="/" className="ct-footer-logo" aria-label="CineTrack home">
+          <span className="ct-footer-logo-icon">🎬</span>
+          <span>
+            Cine<span>Track</span>
+          </span>
+        </Link>
 
-        {/* Top row */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 mb-8">
+        <p className="ct-footer-copy">
+          Copyright © {year}. Created by <span>♥</span> CineTrack Team <span>♥</span>
+        </p>
 
-          {/* Brand */}
-          <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-2xl">🎬</span>
-            <span className="text-white font-bold text-xl group-hover:text-amber-300 transition-colors">
-              Cine<span className="text-amber-400">Track</span>
+        <nav className="ct-footer-links" aria-label="Footer navigation">
+          {links.map((link, index) => (
+            <span key={link.to} className="ct-footer-link-wrap">
+              <Link to={link.to}>{link.label}</Link>
+              {index < links.length - 1 && <b>|</b>}
             </span>
-          </Link>
-
-          {/* Nav links */}
-          <nav className="flex flex-wrap gap-x-6 gap-y-2">
-            {[
-              { to: '/movies',       label: 'Browse Movies' },
-              { to: '/watchlist',    label: 'My Watchlist' },
-              { to: '/profile',      label: 'Profile' },
-              { to: '/subscription', label: 'Subscription' },
-            ].map(({ to, label }) => (
-              <Link
-                key={to}
-                to={to}
-                className="text-sm text-slate-400 hover:text-white transition-colors"
-              >
-                {label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        {/* Divider */}
-        <div className="border-t border-white/6 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-slate-500 text-xs">
-            © {year} CineTrack. All rights reserved.
-          </p>
-          <div className="flex items-center gap-1 text-slate-600 text-xs">
-            <span>Built with</span>
-            <span className="text-amber-400 mx-0.5">♥</span>
-            <span>using React + Node.js</span>
-          </div>
-        </div>
+          ))}
+        </nav>
       </div>
     </footer>
   );

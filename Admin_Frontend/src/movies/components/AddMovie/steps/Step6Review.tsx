@@ -32,11 +32,11 @@ const Step6Review = () => {
             <h4 className="summary-title">{values.title || 'Untitled Movie'}</h4>
             <div className="summary-meta">
               <span>{values.releaseYear || 'TBA'}</span> • 
-              <span>{values.duration || 0} mins</span> • 
-              <span>{values.language || 'Unknown Language'}</span> • 
+              <span>{values.runtime || 0} mins</span> • 
+              <span>{values.spokenLanguage || 'Unknown Language'}</span> • 
               <span className="rating-badge">{values.contentRating || 'U'}</span>
             </div>
-            <p className="summary-desc">{values.description || 'No description provided.'}</p>
+            <p className="summary-desc">{values.overview || 'No overview provided.'}</p>
             
             <div className="summary-stats">
               <div className="stat">

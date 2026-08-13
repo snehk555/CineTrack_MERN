@@ -21,9 +21,16 @@ export const getUserWatchlist = catchAsync(async (req: Request, res: Response) =
   const userId = req.user!.id;
 
   const watchlist = await Watchlist.find({ userId })
-    .populate({ path: 'movieId', populate: ['categoryId', 'genreIds'] })
+    .populate({ 
+      path: 'movieId', 
+      match: { isDeleted: { $ne: true } },
+      populate: ['categoryId', 'genreIds'] 
+    })
     .lean();
-  sendSuccess(res, watchlist, 'Watchlist fetched');
+
+  const filteredWatchlist = watchlist.filter(item => item.movieId != null);
+
+  sendSuccess(res, filteredWatchlist, 'Watchlist fetched');
 });
 
 export const removeFromWatchlist = catchAsync(async (req: Request, res: Response) => {

@@ -1,0 +1,16 @@
+/* AddSeriesModal.css — reuses .add-movie-modal-overlay / .add-movie-modal classes
+   from AddMovieModal.css. Extra stepper styles are added here. */
+
+.wizard-footer {
+  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.wizard-actions-right {
+  display: flex;
+  gap: 12px;
+}

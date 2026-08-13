@@ -14,12 +14,6 @@ export const getMovies = [
   }),
 ];
 
-// GET /api/v1/movies/trending
-export const getTrending = catchAsync(async (_req: Request, res: Response) => {
-  const movies = await movieService.getTrendingMovies();
-  sendSuccess(res, movies, 'Trending movies fetched');
-});
-
 // GET /api/v1/movies/:id
 export const getMovieById = catchAsync(async (req: Request, res: Response) => {
   const movie = await movieService.getMovieById(req.params['id'] as string);

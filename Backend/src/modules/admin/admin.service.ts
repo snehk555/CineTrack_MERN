@@ -255,9 +255,56 @@ export const adminService = {
 
     const slug = data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + data.tmdbId;
     
-    // Add the videoUrl to videoUrls if provided, but keep status pending for the worker
-    const videoUrls = data.videoUrl ? { default: data.videoUrl } : undefined;
-    const movie = await Movie.create({ ...data, slug, processingStatus: 'pending', videoUrls });
+    // Video asset will be handled in VideoAsset collection
+    const movie = await Movie.create({ ...data, slug });
+
+  
+    if (data.cast && data.cast.length > 0) {
+      const Credit = (await import('../../models/credit.model.js')).default;
+      const Person = (await import('../../models/person.model.js')).default;
+      for (const [index, castMember] of data.cast.entries()) {
+        let finalProfilePath = castMember.profilePath || undefined;
+        if (finalProfilePath && finalProfilePath.startsWith('/')) {
+          finalProfilePath = `https://image.tmdb.org/t/p/w500${finalProfilePath}`;
+        }
+        
+        if (finalProfilePath && finalProfilePath.startsWith('http')) {
+          try {
+            const { uploadFromUrl } = await import('../../utils/cloudinary.js');
+            const uploadResult = await uploadFromUrl(finalProfilePath, 'cinetrack/cast');
+            finalProfilePath = uploadResult.url;
+          } catch (err) {
+            logger.error(`Failed to upload actor profile to Cloudinary: ${castMember.name}`, { err });
+          }
+        }
+
+        let person = await Person.findOne({ name: castMember.name });
+
+        if (!person) {
+          person = await Person.create({
+            tmdbId: Date.now() + Math.floor(Math.random() * 10000),
+            name: castMember.name,
+            profilePath: finalProfilePath,
+          });
+        } else if (finalProfilePath && person.profilePath !== finalProfilePath) {
+          person.profilePath = finalProfilePath;
+          await person.save();
+        }
+        await Credit.create({
+          movieId: movie._id, personId: person._id, roleType: 'Actor', characterName: castMember.character, order: index
+        });
+      }
+    }
+
+    if (data.videoUrl) {
+      const VideoAsset = (await import('../../models/videoAsset.model.js')).default;
+      await VideoAsset.create({
+        movieId: movie._id,
+        type: 'Main',
+        resolutions: [{ quality: 'default', url: data.videoUrl }],
+        processingStatus: 'pending'
+      });
+    }
 
     // Enqueue video processing job in BullMQ if videoUrl exists
     if (data.videoUrl) {

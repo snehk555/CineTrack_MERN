@@ -3,10 +3,11 @@ import { mongoIdSchema } from '../../middlewares/validateRequest.js';
 import { addMovieSchema } from '../movies/movie.schema.js';
 
 export const addMovieAdminSchema = addMovieSchema.extend({
-  status: z.enum(['published', 'draft', 'archived']).default('draft'),
+  status: z.enum(['published', 'draft', 'archived', 'scheduled']).default('draft'),
+  publishAt: z.coerce.date().optional(),
   featuredUntil: z.coerce.date().optional(),
   trailerUrl: z.string().url().optional(),
-  language: z.string().optional(),
+  spokenLanguage: z.string().optional(),
   country: z.string().optional(),
   directors: z.array(z.string()).optional(),
   screenshots: z.array(z.string()).optional(),
@@ -21,7 +22,7 @@ export const addMovieAdminSchema = addMovieSchema.extend({
 });
 
 export const updateMovieStatusSchema = z.object({
-  status: z.enum(['published', 'draft', 'archived']),
+  status: z.enum(['published', 'draft', 'archived', 'scheduled']),
 });
 
 export const updateUserRoleSchema = z.object({

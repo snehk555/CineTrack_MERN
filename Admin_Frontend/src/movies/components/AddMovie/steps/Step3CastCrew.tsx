@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button';
 import './Step3CastCrew.css';
 
 const Step3CastCrew = () => {
-  const { register, control, formState: { errors } } = useFormContext();
+  const { register, control, watch, formState: { errors } } = useFormContext();
   
   const { fields, append, remove } = useFieldArray({
     control,
@@ -46,11 +46,22 @@ const Step3CastCrew = () => {
         ) : (
           <div className="actors-list">
             {fields.map((field, index) => {
-              // Extract error safely
               const actorErrors = (errors.actors as any)?.[index];
+              const profilePath = watch(`actors.${index}.profilePath`);
+              const imgUrl = profilePath ? 
+                (profilePath.startsWith('http') ? profilePath : `https://image.tmdb.org/t/p/w200${profilePath}`) 
+                : null;
               
               return (
-                <div key={field.id} className="actor-row">
+                <div key={field.id} className="actor-card">
+                  <div className="actor-photo-wrapper">
+                    {imgUrl ? (
+                      <img src={imgUrl} alt="Actor" className="actor-photo" />
+                    ) : (
+                      <span className="actor-photo-placeholder">No Img</span>
+                    )}
+                  </div>
+                  
                   <div className="actor-inputs">
                     <Input 
                       placeholder="Actor Name (e.g. Christian Bale)"
@@ -58,10 +69,12 @@ const Step3CastCrew = () => {
                       error={actorErrors?.name?.message} 
                     />
                     <Input 
-                      placeholder="Character Role (e.g. Bruce Wayne / Batman)"
+                      placeholder="Character Role (e.g. Bruce Wayne)"
                       {...register(`actors.${index}.role` as const)} 
                       error={actorErrors?.role?.message} 
                     />
+                    {/* Hidden input to store profile path */}
+                    <input type="hidden" {...register(`actors.${index}.profilePath` as const)} />
                   </div>
                   <button 
                     type="button" 

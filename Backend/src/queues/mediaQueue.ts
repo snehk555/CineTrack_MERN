@@ -16,9 +16,18 @@ export interface CleanupMediaJob {
   olderThanDays: number;
 }
 
+export interface ProcessEpisodeVideoJob {
+  episodeId: string;
+  seriesId: string;
+  seasonNumber: number;
+  episodeNumber: number;
+  filePath: string;
+}
+
 export type MediaJobData =
   | { type: 'process-poster'; payload: ProcessPosterJob }
   | { type: 'process-video'; payload: ProcessVideoJob }
+  | { type: 'process-episode-video'; payload: ProcessEpisodeVideoJob }
   | { type: 'cleanup-old-media'; payload: CleanupMediaJob };
 
 export const mediaQueue = new Queue<MediaJobData>('media', {
@@ -37,6 +46,9 @@ export const addProcessPosterJob = (payload: ProcessPosterJob) =>
 
 export const addProcessVideoJob = (payload: ProcessVideoJob) =>
   mediaQueue.add('process-video', { type: 'process-video', payload }, { priority: 1 });
+
+export const addProcessEpisodeVideoJob = (payload: ProcessEpisodeVideoJob) =>
+  mediaQueue.add('process-episode-video', { type: 'process-episode-video', payload }, { priority: 1 });
 
 export const addCleanupMediaJob = (payload: CleanupMediaJob) =>
   mediaQueue.add('cleanup-old-media', { type: 'cleanup-old-media', payload });

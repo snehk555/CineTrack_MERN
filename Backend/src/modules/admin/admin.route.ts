@@ -33,17 +33,47 @@ import {
   getRecentActivity,
   getHealthStatus,
   getAuditLogs,
+  getAnalyticsOverview,
+  getAnalyticsGenres,
+  getAnalyticsSignups,
+  getAnalyticsTopMovies,
+  getAnalyticsPlans,
 } from './admin.analytics.controller.js';
 import { searchTmdbMovies, getTmdbMovieDetails } from '../../utils/tmdbService.js';
 import { sendSuccess } from '../../utils/apiResponse.js';
 import { catchAsync } from '../../middlewares/catchAsync.js';
 import { listGenres, createGenre, updateGenre, deleteGenre as deleteGenreHandler } from './admin.genres.controller.js';
 import { listMoviesAdmin, checkDuplicate, setMovieStatus, toggleFeature, softDeleteMovie, bulkMovieAction } from './admin.movies.controller.js';
-import { uploadMedia } from './admin.upload.controller.js';
+import { listSeriesAdmin, addSeries, getSeriesDetail, updateSeries, addSeason, getSeasons, getEpisodes, updateEpisodeVideo, getTmdbEpisodeData, saveDetailedEpisode, updateSeriesStatus, updateEpisodeStatus } from './admin.series.controller.js';
+import { uploadMedia, uploadVideoRaw } from './admin.upload.controller.js';
 import multer from 'multer';
 
-// Multer memory storage
+import fs from 'fs';
+import path from 'path';
+
+// Multer memory storage (for images)
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } }); // 5MB limit
+
+// Multer disk storage (for large videos)
+const tmpDir = path.join(process.cwd(), 'uploads', 'tmp');
+if (!fs.existsSync(tmpDir)) {
+  fs.mkdirSync(tmpDir, { recursive: true });
+}
+const videoStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, tmpDir),
+  filename: (_req, file, cb) => cb(null, `vid-${Date.now()}-${file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_')}`)
+});
+const uploadVideo = multer({
+  storage: videoStorage,
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2GB limit
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only video files are allowed'));
+    }
+  }
+});
 import {
   listUsers, getUserDetail, getUserTimeline,
   changeUserRole, changeUserPlan,
@@ -61,7 +91,7 @@ import {
   listFlags, createFlag, toggleFlag, updateFlag, deleteFlag,
 } from './admin.featureFlags.controller.js';
 import {
-  getQueueStats, getQueueJobs, retryJob, removeJob,
+  getQueueStats, getQueueJobs, retryJob, removeJob, clearFailedJobs
 } from './admin.mediaQueue.controller.js';
 import {
   getSettings, updateSettings, enableMaintenance, disableMaintenance,
@@ -96,6 +126,7 @@ router.post('/categories',      createCategory);
 
 // ─── Phase 4: Media Upload ───────────────────────────────────────────────────
 router.post('/upload',          upload.single('file'), uploadMedia);
+router.post('/upload-video',    uploadVideo.single('file'), uploadVideoRaw);
 
 // ─── Phase 3: Movies v2 ──────────────────────────────────────────────────────
 router.get('/movies/v2',               listMoviesAdmin);
@@ -104,6 +135,20 @@ router.post('/movies/bulk',            bulkMovieAction);
 router.patch('/movies/v2/:id/status',  validateParams(mongoIdParamsSchema), setMovieStatus);
 router.patch('/movies/v2/:id/feature', validateParams(mongoIdParamsSchema), toggleFeature);
 router.delete('/movies/v2/:id',        validateParams(mongoIdParamsSchema), softDeleteMovie);
+
+// ─── Phase 3: Web Series ─────────────────────────────────────────────────────
+router.get('/series',                  listSeriesAdmin);
+router.post('/series',                 addSeries);
+router.get('/series/:id',              validateParams(mongoIdParamsSchema), getSeriesDetail);
+router.patch('/series/:id',            validateParams(mongoIdParamsSchema), updateSeries);
+router.post('/series/:id/seasons',     validateParams(mongoIdParamsSchema), addSeason);
+router.get('/series/:id/tmdb/season/:seasonNumber/episode/:episodeNumber', getTmdbEpisodeData);
+router.post('/series/:id/episodes',    validateParams(mongoIdParamsSchema), saveDetailedEpisode);
+router.get('/series/:id/seasons',      validateParams(mongoIdParamsSchema), getSeasons);
+router.get('/series/:id/seasons/:seasonId/episodes', getEpisodes);
+router.patch('/series/:id/status',     validateParams(mongoIdParamsSchema), updateSeriesStatus);
+router.patch('/episodes/:episodeId/video', updateEpisodeVideo);
+router.patch('/episodes/:episodeId/status', updateEpisodeStatus);
 
 // ─── Legacy Dashboard & Analytics (keeping for backward compat) ──────────────
 router.get('/analytics/dashboard', getDashboard);
@@ -154,6 +199,13 @@ router.get('/analytics/content-performance', getContentPerformance);
 router.get('/analytics/churn-signal',        getChurnSignal);
 router.get('/analytics/heatmap',             getPeakUsageHeatmap);
 
+// ─── Analytics (New V2 Frontend Endpoints) ──────────────────────────────────
+router.get('/analytics/overview',            getAnalyticsOverview);
+router.get('/analytics/genres',              getAnalyticsGenres);
+router.get('/analytics/signups',             getAnalyticsSignups);
+router.get('/analytics/top-movies',          getAnalyticsTopMovies);
+router.get('/analytics/plans',               getAnalyticsPlans);
+
 // ─── Phase 5: Feature Flags ───────────────────────────────────────────────────
 router.get('/feature-flags',                  listFlags);
 router.post('/feature-flags',                 createFlag);
@@ -165,6 +217,7 @@ router.delete('/feature-flags/:key',          deleteFlag);
 router.get('/media-queue',                    getQueueStats);
 router.get('/media-queue/jobs',               getQueueJobs);
 router.post('/media-queue/retry/:jobId',      retryJob);
+router.delete('/media-queue/failed',          clearFailedJobs);
 router.delete('/media-queue/jobs/:jobId',     removeJob);
 
 // ─── Phase 6: App Settings ────────────────────────────────────────────────────
@@ -189,15 +242,17 @@ router.delete('/webhooks/:id',               validateParams(mongoIdParamsSchema)
 router.get('/tmdb/search', catchAsync(async (req, res) => {
   const query = req.query.q as string;
   const page = req.query.page ? Number(req.query.page) : 1;
+  const type = (req.query.type as 'multi' | 'movie' | 'tv') || 'multi';
   if (!query) { res.status(400).json({ success: false, message: 'Query is required' }); return; }
-  const results = await searchTmdbMovies(query, page);
+  const results = await searchTmdbMovies(query, page, type);
   sendSuccess(res, results, 'TMDB search results');
 }));
 
 router.get('/tmdb/movie/:tmdbId', catchAsync(async (req, res) => {
   const tmdbId = Number(req.params['tmdbId']);
+  const mediaType = req.query.mediaType as 'movie' | 'tv' | undefined;
   if (isNaN(tmdbId)) { res.status(400).json({ success: false, message: 'Invalid TMDB ID' }); return; }
-  const details = await getTmdbMovieDetails(tmdbId);
+  const details = await getTmdbMovieDetails(tmdbId, mediaType);
   sendSuccess(res, details, 'TMDB movie details');
 }));
 

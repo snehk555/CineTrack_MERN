@@ -6,10 +6,11 @@ import './Sidebar.css';
 const NAV_ITEMS = [
   { to: '/dashboard',     label: 'Dashboard',     icon: '▣' },
   { to: '/movies',        label: 'Movies',         icon: '◈' },
+  { to: '/series',        label: 'Web Series',     icon: '📺' },
   { to: '/users',         label: 'Users',          icon: '◎' },
   { to: '/reviews',       label: 'Reviews',        icon: '◆' },
   { to: '/analytics',     label: 'Analytics',      icon: '◇' },
-  { to: '/media-queue',   label: 'Media Queue',    icon: '◐' },
+  { to: '/media-queue',   label: 'Task Queues',    icon: '◐' },
   { to: '/feature-flags', label: 'Feature Flags',  icon: '⊞' },
   { to: '/audit-logs',    label: 'Audit Logs',     icon: '☰' },
   { to: '/settings',      label: 'Settings',       icon: '⊙' },

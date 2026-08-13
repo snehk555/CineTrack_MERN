@@ -101,6 +101,9 @@
   vertical-align: middle;
 }
 .data-table td:first-child { text-align: center; }
+.data-table td:last-child { text-align: right; }
+.data-table thead th:last-child { text-align: right; }
+.text-right { text-align: right; }
 
 /* Movie title cell */
 .movie-title-cell { display: flex; align-items: center; gap: 0.625rem; }

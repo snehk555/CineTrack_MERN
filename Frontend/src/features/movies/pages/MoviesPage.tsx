@@ -1,119 +1,109 @@
-import { useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector, setCategory, setGenre, setSortBy, setOrder, resetFilters } from '../../../store';
-import { useInfiniteMovies } from '../hooks/moviesQueries';
-import { useCategories, useGenres } from '../hooks/moviesQueries';
+import { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAppDispatch, useAppSelector, setGenre, setPage, resetFilters } from '../../../store';
+import { useMovies } from '../hooks/moviesQueries';
 import MovieCard from '../components/MovieCard';
 import SkeletonCard from '../components/SkeletonCard';
+import GenreTagBar from '../../../shared/components/ui/GenreTagBar';
+import Pagination from '../../../shared/components/ui/Pagination';
 
 export default function MoviesPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const filters = useAppSelector((state) => state.filters);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } = useInfiniteMovies();
-  const { data: categories } = useCategories();
-  const { data: genres } = useGenres();
+  // Sync URL params → Redux on mount
+  useEffect(() => {
+    const genre = searchParams.get('genre');
+    if (genre) dispatch(setGenre(genre));
+    // year filter not yet in redux — handled via search
+  }, []);
 
-  // Intersection Observer for infinite scroll trigger
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const loaderRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (isFetchingNextPage) return;
-      if (observerRef.current) observerRef.current.disconnect();
-      observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
-      });
-      if (node) observerRef.current.observe(node);
-    },
-    [isFetchingNextPage, hasNextPage, fetchNextPage]
-  );
+  const { data, isLoading, isError } = useMovies();
+  const movies = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
+  const currentPage = data?.page ?? 1;
 
-  const allMovies = data?.pages.flatMap((p) => p.data) ?? [];
+  const handlePage = (p: number) => {
+    dispatch(setPage(p));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
-    <div className="min-h-screen bg-[#09090b]">
-      <div className="max-w-7xl mx-auto px-6 py-8">
+    <div style={{ minHeight: '100vh', background: '#0e0e0e' }}>
+      {/* Genre tag bar */}
+      <div style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0 20px' }}>
+        <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+          <GenreTagBar />
+        </div>
+      </div>
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '24px 20px' }}>
+
+        {/* Header row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
-            <h1 className="text-3xl font-bold text-white">Browse Movies</h1>
-            <p className="text-slate-400 text-sm mt-1">
-              {data?.pages[0]?.total ?? 0} movies found
+            <h1 style={{ color: '#fff', fontWeight: 800, fontSize: 22, margin: 0 }}>Browse Movies</h1>
+            <p style={{ color: '#52525b', fontSize: 12, margin: '4px 0 0' }}>
+              {total} movies found
             </p>
           </div>
-          {(filters.category || filters.genre || filters.search) && (
-            <button
-              onClick={() => dispatch(resetFilters())}
-              className="text-sm text-amber-400 hover:text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg transition-colors"
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Sort select */}
+            <select
+              className="ct-episode-select"
+              onChange={(e) => {
+                // handled through redux setSortBy/setOrder
+                const val = e.target.value;
+                if (val === 'newest') { dispatch({ type: 'filters/setSortBy', payload: 'createdAt' }); dispatch({ type: 'filters/setOrder', payload: 'desc' }); }
+                else if (val === 'rating') { dispatch({ type: 'filters/setSortBy', payload: 'rating' }); dispatch({ type: 'filters/setOrder', payload: 'desc' }); }
+                else if (val === 'az') { dispatch({ type: 'filters/setSortBy', payload: 'title' }); dispatch({ type: 'filters/setOrder', payload: 'asc' }); }
+                else if (val === 'year') { dispatch({ type: 'filters/setSortBy', payload: 'releaseYear' }); dispatch({ type: 'filters/setOrder', payload: 'desc' }); }
+              }}
+              style={{ fontSize: 12 }}
             >
-              Reset filters
-            </button>
-          )}
-        </div>
+              <option value="newest">Newest</option>
+              <option value="rating">Top Rated</option>
+              <option value="az">A–Z</option>
+              <option value="year">By Year</option>
+            </select>
 
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          <select
-            value={filters.category}
-            onChange={(e) => dispatch(setCategory(e.target.value))}
-            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-amber-500 transition-colors"
-          >
-            <option value="">All Categories</option>
-            {categories?.map((c: { _id: string; name: string }) => (
-              <option key={c._id} value={c._id}>{c.name}</option>
-            ))}
-          </select>
-
-          <select
-            value={filters.genre}
-            onChange={(e) => dispatch(setGenre(e.target.value))}
-            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-amber-500 transition-colors"
-          >
-            <option value="">All Genres</option>
-            {genres?.map((g: { _id: string; name: string }) => (
-              <option key={g._id} value={g._id}>{g.name}</option>
-            ))}
-          </select>
-
-          <select
-            value={`${filters.sortBy}-${filters.order}`}
-            onChange={(e) => {
-              const [field, ord] = e.target.value.split('-') as [typeof filters.sortBy, typeof filters.order];
-              dispatch(setSortBy(field));
-              dispatch(setOrder(ord));
-            }}
-            className="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-300 text-sm outline-none focus:border-amber-500 transition-colors"
-          >
-            <option value="createdAt-desc">Newest First</option>
-            <option value="rating-desc">Highest Rated</option>
-            <option value="title-asc">A–Z</option>
-            <option value="releaseYear-desc">Latest Release</option>
-          </select>
+            {filters.genre && (
+              <button
+                onClick={() => dispatch(resetFilters())}
+                style={{
+                  background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)',
+                  color: '#fbbf24', fontSize: 12, fontWeight: 600,
+                  padding: '6px 12px', borderRadius: 6, cursor: 'pointer',
+                }}
+              >
+                ✕ Clear Filter
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Grid */}
         {isError ? (
-          <div className="text-center py-20">
-            <p className="text-4xl mb-3">⚠️</p>
-            <p className="text-slate-400">Failed to load movies. Please try again.</p>
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <p style={{ fontSize: 40 }}>⚠️</p>
+            <p style={{ color: '#52525b' }}>Failed to load movies. Please try again.</p>
           </div>
         ) : isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {Array.from({ length: 15 }).map((_, i) => <SkeletonCard key={i} />)}
+          <div className="ct-grid-6">
+            {Array.from({ length: 18 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
-        ) : allMovies.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-5xl mb-4">🎬</p>
-            <p className="text-white text-lg font-medium">No movies found</p>
-            <p className="text-slate-400 text-sm mt-1">Try adjusting your filters</p>
+        ) : movies.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <p style={{ fontSize: 48, marginBottom: 8 }}>🎬</p>
+            <p style={{ color: '#fff', fontWeight: 600, fontSize: 16 }}>No movies found</p>
+            <p style={{ color: '#52525b', fontSize: 13 }}>Try selecting a different genre</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {allMovies.map((movie) => (
+          <div className="ct-grid-6">
+            {movies.map((movie) => (
               <MovieCard
                 key={movie._id}
                 movie={movie}
@@ -123,16 +113,10 @@ export default function MoviesPage() {
           </div>
         )}
 
-        {/* Infinite scroll trigger */}
-        <div ref={loaderRef} className="py-8 flex justify-center">
-          {isFetchingNextPage && (
-            <div className="flex gap-1">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Pagination */}
+        {total > 0 && (
+          <Pagination page={currentPage} totalPages={totalPages} onPage={handlePage} alwaysShow={true} />
+        )}
       </div>
     </div>
   );

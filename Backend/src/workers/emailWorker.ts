@@ -7,13 +7,26 @@ import { EmailJobData } from '../queues/emailQueue.js';
 
 const resend = new Resend(env.RESEND_API_KEY ?? '');
 
+/**
+ * Resend SDK never throws — it always returns { data, error }.
+ * We must manually check and throw so BullMQ correctly marks failed jobs.
+ */
 const sendEmail = async (to: string, subject: string, html: string) => {
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: env.EMAIL_FROM,
     to,
     subject,
     html,
   });
+
+  if (error) {
+    // Surface the real Resend error so BullMQ marks this job as FAILED
+    logger.error('Resend API error', { to, subject, error });
+    throw new Error(`Resend send failed: ${error.message}`);
+  }
+
+  // Log the Resend message ID so you can trace it in the Resend dashboard
+  logger.info(`Resend accepted email`, { to, subject, resendId: data?.id });
 };
 
 const processEmailJob = async (job: Job<EmailJobData>) => {
@@ -49,6 +62,9 @@ const processEmailJob = async (job: Job<EmailJobData>) => {
       logger.warn('Unknown email job type received');
     }
   }
+
+  // Update BullMQ progress to 100% on success
+  await job.updateProgress(100);
 };
 
 export const emailWorker = new Worker<EmailJobData>(

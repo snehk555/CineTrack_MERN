@@ -15,7 +15,7 @@ export const connectDB = async (): Promise<void> => {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-    });
+    }); 
 
     isConnected = true;
     logger.info('MongoDB connected');

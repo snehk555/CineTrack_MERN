@@ -1,11 +1,11 @@
 import apiClient from '@/services/axios';
 
 export const tmdbApi = {
-  search: (query: string, page = 1) => 
-    apiClient.get(`/v1/admin/tmdb/search?q=${encodeURIComponent(query)}&page=${page}`).then(res => res.data),
+  search: (query: string, type: 'multi' | 'movie' | 'tv' = 'multi', page = 1) => 
+    apiClient.get(`/v1/admin/tmdb/search?q=${encodeURIComponent(query)}&type=${type}&page=${page}`).then(res => res.data),
     
-  getDetails: (tmdbId: number) => 
-    apiClient.get(`/v1/admin/tmdb/movie/${tmdbId}`).then(res => res.data),
+  getDetails: (tmdbId: number, mediaType?: 'movie' | 'tv') => 
+    apiClient.get(`/v1/admin/tmdb/movie/${tmdbId}${mediaType ? `?mediaType=${mediaType}` : ''}`).then(res => res.data),
 };
 
 export const moviesApiHelpers = {

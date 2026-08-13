@@ -23,11 +23,56 @@ interface PlanDistribution { plan: string; count: number; percentage: number }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 const period = (days: number) => `?days=${days}`;
-const fetchOverview  = (days: number) => apiClient.get<ApiResponse<OverviewStats>>(`/v1/admin/analytics/overview${period(days)}`).then(r => r.data.data);
-const fetchGenres    = (days: number) => apiClient.get<ApiResponse<GenrePopularity[]>>(`/v1/admin/analytics/genres${period(days)}`).then(r => r.data.data);
-const fetchSignups   = (days: number) => apiClient.get<ApiResponse<DailySignup[]>>(`/v1/admin/analytics/signups${period(days)}`).then(r => r.data.data);
-const fetchTopMovies = (days: number) => apiClient.get<ApiResponse<TopMovie[]>>(`/v1/admin/analytics/top-movies${period(days)}`).then(r => r.data.data);
-const fetchPlans     = ()              => apiClient.get<ApiResponse<PlanDistribution[]>>('/v1/admin/analytics/plans').then(r => r.data.data);
+
+const fetchOverview = async (days: number) => {
+  try {
+    const r = await apiClient.get<ApiResponse<OverviewStats>>(`/v1/admin/analytics/overview${period(days)}`);
+    return r.data.data;
+  } catch (error) {
+    console.error("Error fetching overview:", error);
+    throw error;
+  }
+};
+
+const fetchGenres = async (days: number) => {
+  try {
+    const r = await apiClient.get<ApiResponse<GenrePopularity[]>>(`/v1/admin/analytics/genres${period(days)}`);
+    return r.data.data;
+  } catch (error) {
+    console.error("Error fetching genres:", error);
+    throw error;
+  }
+};
+
+const fetchSignups = async (days: number) => {
+  try {
+    const r = await apiClient.get<ApiResponse<DailySignup[]>>(`/v1/admin/analytics/signups${period(days)}`);
+    return r.data.data;
+  } catch (error) {
+    console.error("Error fetching signups:", error);
+    throw error;
+  }
+};
+
+const fetchTopMovies = async (days: number) => {
+  try {
+    const r = await apiClient.get<ApiResponse<TopMovie[]>>(`/v1/admin/analytics/top-movies${period(days)}`);
+    return r.data.data;
+  } catch (error) {
+    console.error("Error fetching top movies:", error);
+    throw error;
+  }
+};
+
+const fetchPlans = async () => {
+  try {
+    const r = await apiClient.get<ApiResponse<PlanDistribution[]>>('/v1/admin/analytics/plans');
+    return r.data.data;
+  } catch (error) {
+    console.error("Error fetching plans:", error);
+    throw error;
+  }
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function fmt(n: number | undefined) { return (n ?? 0).toLocaleString('en-IN'); }

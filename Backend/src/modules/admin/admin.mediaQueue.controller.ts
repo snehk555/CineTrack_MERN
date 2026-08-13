@@ -49,14 +49,21 @@ export const getQueueJobs = catchAsync(async (req: Request, res: Response) => {
   const start     = Math.max(Number(req.query['start'] ?? 0), 0);
   const end       = start + Math.min(Number(req.query['limit'] ?? 20), 50) - 1;
 
-  const VALID_STATUSES = ['waiting', 'active', 'completed', 'failed', 'delayed'];
+  const VALID_STATUSES = ['waiting', 'active', 'completed', 'failed', 'delayed', 'all'];
   if (!VALID_STATUSES.includes(status)) throw new AppError('Invalid status', 400);
 
   const queue = queueName === 'email' ? emailQueue : mediaQueue;
 
   type BullStatus = 'waiting' | 'active' | 'completed' | 'failed' | 'delayed';
-  const jobs = await queue.getJobs([status as BullStatus], start, end);
-  const serialized = jobs.map(serializeJob);
+  const statusesToFetch = status === 'all'
+    ? ['waiting', 'active', 'completed', 'failed', 'delayed'] as BullStatus[]
+    : [status as BullStatus];
+
+  const jobs = await queue.getJobs(statusesToFetch, start, end);
+  const serialized = await Promise.all(jobs.map(async (job) => ({
+    ...serializeJob(job),
+    status: await job.getState()
+  })));
 
   sendSuccess(res, {
     queue: queueName,
@@ -97,4 +104,16 @@ export const removeJob = catchAsync(async (req: Request, res: Response) => {
   await job.remove();
 
   sendSuccess(res, { jobId }, `Job ${jobId} removed`);
+});
+
+// ─── DELETE /api/v1/admin/media-queue/failed ─────────────────────────────────
+// Clear all failed jobs
+export const clearFailedJobs = catchAsync(async (req: Request, res: Response) => {
+  const queueName = (req.query['queue'] as string | undefined) ?? 'media';
+  const queue = queueName === 'email' ? emailQueue : mediaQueue;
+
+  // BullMQ clean method: grace period 0, limit 1000, type 'failed'
+  const jobsCleaned = await queue.clean(0, 1000, 'failed');
+
+  sendSuccess(res, { jobsCleaned }, `Failed jobs cleared`);
 });

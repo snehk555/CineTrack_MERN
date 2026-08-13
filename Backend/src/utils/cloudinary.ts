@@ -54,6 +54,32 @@ export const uploadImage = async (
   return uploadFromBuffer(buffer, folder, options);
 };
 
+export const uploadFromUrl = async (
+  url: string,
+  folder: string,
+  customOptions?: Record<string, unknown>
+): Promise<UploadResult> => {
+  const options: Record<string, unknown> = {
+    folder,
+    resource_type: 'image',
+    quality: 'auto',
+    format: 'webp',
+    width: 500,
+    crop: 'limit',
+    ...customOptions,
+  };
+  logger.info(`Uploading image from URL to Cloudinary — folder: ${folder}`);
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload(url, options, (error, result) => {
+      if (error || !result) {
+        reject(error ?? new Error('Cloudinary upload failed'));
+        return;
+      }
+      resolve({ url: result.secure_url, publicId: result.public_id });
+    });
+  });
+};
+
 export const uploadBackdrop = async (buffer: Buffer): Promise<UploadResult> => {
   logger.info('Uploading backdrop to Cloudinary');
   return uploadFromBuffer(buffer, 'cinetrack/backdrops', {

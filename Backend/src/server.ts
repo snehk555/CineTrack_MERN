@@ -5,6 +5,7 @@ import { redis } from './config/redis.js';
 import { env } from './config/env.js';
 import { logger } from './utils/logger.js';
 import { initializeSocket } from './sockets/socketHandler.js';
+import { startScheduledPublishCron } from './scripts/scheduledPublishCron.js';
 
 const PORT = Number(env.PORT);
 
@@ -37,6 +38,9 @@ process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 const startServer = async () => {
   await connectDB();
+
+  // Start background cron jobs
+  startScheduledPublishCron();
 
   httpServer.listen(PORT, () => {
     logger.info(`Server running on port ${PORT} [${env.NODE_ENV}]`);

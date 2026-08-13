@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import Button from '@/components/ui/Button';
+import apiClient from '@/services/axios';
+import { toast } from 'sonner';
 import './Step5Video.css';
 
 const Step5Video = () => {
@@ -22,37 +24,55 @@ const Step5Video = () => {
     setIsDragging(false);
   };
 
-  const simulateUpload = () => {
+  const uploadFile = async (file: File) => {
+    if (!file.type.startsWith('video/')) {
+      toast.error('Please upload a valid video file');
+      return;
+    }
+
     setUploadStatus('uploading');
     setProgress(0);
-    
-    const interval = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 100) {
-          clearInterval(interval);
-          setUploadStatus('processing');
-          setTimeout(() => {
-            setUploadStatus('ready');
-            setValue('videoUrl', 'internal://uploaded_video_placeholder.mp4', { shouldValidate: true });
-          }, 1500);
-          return 100;
-        }
-        return p + 10;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await apiClient.post('/v1/admin/upload-video', formData, {
+        timeout: 0,
+        withCredentials: true,
+        headers: { 'Content-Type': 'multipart/form-data' }, // Override default application/json so multer can parse the video file
+        onUploadProgress: (progressEvent) => {  
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setProgress(percentCompleted);
+          }
+        },
       });
-    }, 200);
+
+      if (response.data.success) {
+        setUploadStatus('ready');
+        // Setting the local file path returned by the server as videoUrl
+        setValue('videoUrl', response.data.data.url, { shouldValidate: true });
+        toast.success('Video uploaded successfully!');
+      }
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setUploadStatus('idle');
+      toast.error('Failed to upload video');
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      simulateUpload();
+      uploadFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      simulateUpload();
+      uploadFile(e.target.files[0]);
     }
   };
 

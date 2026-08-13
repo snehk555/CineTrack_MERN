@@ -11,7 +11,13 @@ export const adminProtect = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies['adminAccessToken'] as string | undefined;
 
-    if (!token) throw new UnauthorizedError('Admin authentication required');
+    if (!token) {
+      console.log('--- ADMIN AUTH FAILED ---');
+      console.log('Path:', req.path);
+      console.log('Headers:', req.headers);
+      console.log('Cookies parsed:', req.cookies);
+      throw new UnauthorizedError('Admin authentication required');
+    }
 
     let decoded;
     try {

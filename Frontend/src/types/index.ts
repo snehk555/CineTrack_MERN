@@ -30,7 +30,9 @@ export interface Movie {
   trailerUrl?: string;
   releaseYear?: number;
   runtime?: number;
-  language?: string;
+  totalSeasons?: number;
+  totalEpisodes?: number;
+  spokenLanguage?: string;
   averageRating: number;
   totalRatings: number;
   totalReviews: number;
@@ -61,6 +63,34 @@ export interface Genre {
   name: string;
   slug?: string;
   color?: string;
+}
+
+export interface Season {
+  _id: string;
+  seriesId: string;
+  seasonNumber: number;
+  title: string;
+  overview?: string;
+  posterPath?: string;
+  episodeCount: number;
+  airDate?: string;
+  tmdbSeasonId?: number;
+}
+
+export interface Episode {
+  _id: string;
+  seriesId: string;
+  seasonId: string;
+  episodeNumber: number;
+  title: string;
+  overview?: string;
+  runtime?: number;
+  thumbnailUrl?: string;
+  airDate?: string;
+  videoUrls?: Record<string, string>;
+  processingStatus: 'pending' | 'processing' | 'ready' | 'failed';
+  cast?: { name: string; character: string; profilePath?: string }[];
+  status?: 'published' | 'draft' | 'scheduled';
 }
 
 // Phase 4 — status enum replaces isApproved boolean

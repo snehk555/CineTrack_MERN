@@ -39,8 +39,8 @@ const AddMovieModal: React.FC<Props> = ({ isOpen, onClose }) => {
     resolver: zodResolver(addMovieSchema),
     defaultValues: {
       title: '',
-      description: '',
-      language: 'English',
+      overview: '',
+      spokenLanguage: 'English',
       contentRating: 'U/A',
       type: 'Movie',
       genreIds: [],
@@ -57,7 +57,7 @@ const AddMovieModal: React.FC<Props> = ({ isOpen, onClose }) => {
     
     // Step-by-step validation logic
     if (currentStep === 1) {
-      fieldsToValidate = ['title', 'description', 'releaseYear', 'duration', 'language', 'contentRating', 'type'];
+      fieldsToValidate = ['title', 'overview', 'releaseYear', 'runtime', 'spokenLanguage', 'contentRating', 'type'];
     } else if (currentStep === 2) {
       fieldsToValidate = ['genreIds', 'tags', 'category'];
     } else if (currentStep === 3) {
@@ -81,8 +81,6 @@ const AddMovieModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const payload: any = {
       ...data,
       categoryId: data.category,     // backend expects categoryId
-      overview: data.description,    // backend expects overview
-      runtime: data.duration,        // backend expects runtime
       tmdbId: data.tmdbId || Math.floor(Math.random() * 1000000), // backend requires tmdbId
       cast: data.actors?.map((actor: any) => ({
         name: actor.name,
@@ -93,8 +91,6 @@ const AddMovieModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
     // Remove frontend-only keys
     delete payload.category;
-    delete payload.description;
-    delete payload.duration;
     delete payload.actors;
 
     addMovie(payload, {

@@ -10,6 +10,8 @@ export type SocketEventName =
   | 'movie:added'
   | 'video:processed'
   | 'video:progress'
+  | 'episode-video:processed'
+  | 'episode-video:progress'
   | 'user:banned'
   | 'subscription:activated';
 

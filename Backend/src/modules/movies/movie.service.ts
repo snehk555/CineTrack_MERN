@@ -66,18 +66,6 @@ export const movieService = {
     return movie;
   },
 
-  async getTrendingMovies() {
-    const cacheKey = 'cache:movies:trending';
-
-    const cached = await redis.get(cacheKey).catch(() => null);
-    if (cached) return JSON.parse(cached);
-
-    const movies = await movieRepository.getTrending(10);
-
-    redis.setex(cacheKey, 3600, JSON.stringify(movies)).catch(() => null);
-    return movies;
-  },
-
   async getStats() {
     return movieRepository.getAggregatedStats();
   },

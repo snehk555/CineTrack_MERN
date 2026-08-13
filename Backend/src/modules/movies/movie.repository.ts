@@ -1,12 +1,20 @@
 import Movie from '../../models/movie.model.js';
 import { MovieQueryInput, AddMovieInput, UpdateMovieInput } from './movie.schema.js';
+import Credit from '../../models/credit.model.js';
+import VideoAsset from '../../models/videoAsset.model.js';
+import '../../models/person.model.js';
 
 export const movieRepository = {
   async findAll({ page, limit, search, categoryId, genreId, sortBy, order }: MovieQueryInput) {
-    const filter: Record<string, unknown> = { isDeleted: false };
+    const now = new Date();
+    const filter: Record<string, unknown> = {
+      status: 'published',
+      isDeleted: false,
+      $or: [{ publishAt: { $lte: now } }, { publishAt: { $exists: false } }],
+    };
 
     if (search) {
-      filter.title = { $regex: search, $options: 'i' };
+      filter.$text = { $search: search };
     }
     if (categoryId) {
       filter.categoryId = categoryId;
@@ -33,10 +41,37 @@ export const movieRepository = {
   },
  
   async findById(id: string) {
-    return Movie.findOne({ _id: id, isDeleted: false })
+    const movie = await Movie.findOne({ _id: id, isDeleted: false })
       .populate('categoryId', 'name icon')
       .populate('genreIds', 'name')
       .lean();
+
+    if (!movie) return null;
+
+    // Backwards compatibility layer: stitch normalized models back into the old format
+    const credits = await Credit.find({ movieId: id }).populate('personId').sort('order').lean();
+    if (credits && credits.length > 0) {
+      movie.cast = credits.filter(c => c.roleType === 'Actor').map((c: any) => ({
+        name: c.personId?.name || 'Unknown',
+        character: c.characterName || '',
+        profilePath: c.personId?.profilePath
+      }));
+      movie.directors = credits.filter(c => c.roleType === 'Director').map((c: any) => c.personId?.name || 'Unknown');
+    }
+
+    const videoAsset = await VideoAsset.findOne({ movieId: id, type: 'Main' }).lean();
+    if (videoAsset && videoAsset.resolutions) {
+      const vUrls: Record<string, string> = {};
+      videoAsset.resolutions.forEach(res => {
+        vUrls[res.quality] = res.url;
+      });
+      movie.videoUrls = vUrls as any;
+      if (videoAsset.processingStatus) movie.processingStatus = videoAsset.processingStatus;
+      if (videoAsset.thumbnailUrl) movie.thumbnailUrl = videoAsset.thumbnailUrl;
+      if (videoAsset.duration) movie.videoDuration = videoAsset.duration;
+    }
+
+    return movie;
   },
 
   async findByTmdbId(tmdbId: number) {
@@ -68,12 +103,10 @@ export const movieRepository = {
     ]);
   },
 
-  async getTrending(limit = 10) {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    return Movie.aggregate([
-      { $match: { isDeleted: false, createdAt: { $gte: sevenDaysAgo } } },
-      { $sort: { watchlistCount: -1, createdAt: -1 } },
-      { $limit: limit },
-    ]);
+  async getTrending(limit: number) {
+    return Movie.find({ status: 'published', isDeleted: false })
+      .sort({ averageRating: -1, totalWatchlists: -1 })
+      .limit(limit)
+      .lean();
   },
 };

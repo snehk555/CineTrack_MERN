@@ -2,26 +2,7 @@ import type { Review, User } from '../../../types';
 import { useAppSelector } from '../../../store';
 import { useDeleteReview } from '../hooks/reviewsQueries';
 
-// ─── Star display ─────────────────────────────────────────────────────────────
-function Stars({ rating }: { rating: number }) {
-  // rating is 1-10, display as 0-5 stars
-  const stars = rating / 2;
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <svg key={i} width="13" height="13" viewBox="0 0 13 13" fill="none">
-          <path
-            d="M6.5 1l1.545 3.13 3.455.502-2.5 2.437.59 3.437L6.5 9l-3.09 1.506.59-3.437L1.5 4.632l3.455-.502L6.5 1z"
-            fill={i <= Math.round(stars) ? '#7c3aed' : 'rgba(255,255,255,0.12)'}
-            stroke={i <= Math.round(stars) ? '#7c3aed' : 'rgba(255,255,255,0.12)'}
-            strokeWidth="0.5"
-          />
-        </svg>
-      ))}
-      <span className="ml-1.5 text-xs text-slate-400 font-medium">{rating}/10</span>
-    </div>
-  );
-}
+
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 function Avatar({ name, avatarUrl }: { name: string; avatarUrl?: string }) {
@@ -62,7 +43,8 @@ export default function ReviewCard({ review, movieId }: ReviewCardProps) {
   const { mutate: deleteReview, isPending: isDeleting } = useDeleteReview(movieId);
 
   const reviewer = typeof review.userId === 'object' ? (review.userId as User) : null;
-  const name     = reviewer?.name ?? 'Anonymous';
+  let name     = reviewer?.name ?? 'Anonymous';
+  if (name.toLowerCase() === 'admin') name = 'CineTrack User';
   const avatar   = reviewer?.avatarUrl;
   const isOwner  = currentUser && reviewer && currentUser._id === reviewer._id;
 
@@ -74,8 +56,7 @@ export default function ReviewCard({ review, movieId }: ReviewCardProps) {
         {/* Top row */}
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-sm font-medium text-white leading-none mb-1">{name}</p>
-            <Stars rating={review.rating} />
+            <p className="text-sm font-medium text-white leading-none">{name}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-xs text-slate-500">{relativeTime(review.createdAt)}</span>

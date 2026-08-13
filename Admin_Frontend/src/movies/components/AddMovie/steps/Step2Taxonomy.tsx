@@ -67,7 +67,7 @@ const Step2Taxonomy = () => {
   return (
     <div className="step-container step2-taxonomy">
       <div className="genres-section">
-        <label className="input-label">Genres * (Select at least one)</label>
+        <label className="input-label">Genres (Optional)</label>
         
         {isLoadingGenres ? (
           <div className="genres-loading">Loading genres...</div>

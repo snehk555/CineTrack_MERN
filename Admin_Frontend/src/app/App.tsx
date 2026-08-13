@@ -6,6 +6,7 @@ const LoginPage = lazy(() => import('@/auth/pages/LoginPage'));
 const AdminShell = lazy(() => import('@/components/layout/AdminShell'));
 
 // ─── Full-page spinner while auth initializes ─────────────────────────────
+
 const PageLoader = () => (
   <div
     style={{

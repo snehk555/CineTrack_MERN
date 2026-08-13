@@ -26,3 +26,16 @@ export const uploadMedia = catchAsync(async (req: Request, res: Response) => {
 
   sendSuccess(res, { url: result.url, publicId: result.publicId }, 'File uploaded successfully');
 });
+
+export const uploadVideoRaw = catchAsync(async (req: Request, res: Response) => {
+  if (!req.file) {
+    throw new AppError('No video file uploaded', 400);
+  }
+  
+  // Return the path where it was saved locally
+  sendSuccess(res, { 
+    url: req.file.path, 
+    originalName: req.file.originalname,
+    size: req.file.size
+  }, 'Video uploaded to local storage successfully');
+});

@@ -3,7 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IReview extends Document {
   userId: mongoose.Types.ObjectId;
   movieId: mongoose.Types.ObjectId;
-  rating: number;
+  rating?: number;
   comment?: string;
   status: 'pending' | 'approved' | 'rejected';
   rejectionReason?: string;
@@ -16,7 +16,7 @@ const reviewSchema = new Schema<IReview>(
   {
     userId:          { type: Schema.Types.ObjectId, ref: 'User',  required: true },
     movieId:         { type: Schema.Types.ObjectId, ref: 'Movie', required: true },
-    rating:          { type: Number, required: true, min: 1, max: 10 },
+    rating:          { type: Number, min: 1, max: 10 },
     comment:         { type: String, maxlength: 1000 },
     status:          { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     rejectionReason: { type: String, maxlength: 500 },

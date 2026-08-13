@@ -29,7 +29,7 @@ export interface Movie {
   description: string;
   releaseYear: number;
   duration: number;
-  language: string;
+  spokenLanguage: string;
   status: MovieStatus;
   type: ContentType;
   genres: string[];

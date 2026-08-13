@@ -15,10 +15,9 @@ interface MediaJob {
   progress: number;
   failedReason?: string;
   attemptsMade: number;
-  attemptsMax: number;
-  createdAt: string;
-  processedAt?: string;
-  finishedAt?: string;
+  timestamp: number;
+  processedOn?: number | null;
+  finishedOn?: number | null;
 }
 
 interface QueueStats {
@@ -30,22 +29,36 @@ interface QueueStats {
 }
 
 // ─── API ──────────────────────────────────────────────────────────────────────
-const fetchQueue = async (status: JobStatus | 'all', page: number) => {
-  const params = new URLSearchParams({ page: String(page), limit: '20' });
-  if (status !== 'all') params.set('status', status);
-  const { data } = await apiClient.get<ApiResponse<{ jobs: MediaJob[]; stats: QueueStats; total: number; totalPages: number }>>(
-    `/v1/admin/media-queue?${params.toString()}`
-  );
-  return data.data;
+const fetchQueue = async (queueType: 'media' | 'email', status: JobStatus | 'all', page: number) => {
+  const limit = 20;
+  const start = (page - 1) * limit;
+  const params = new URLSearchParams({ limit: String(limit), start: String(start), status, queue: queueType });
+  
+  const [statsRes, jobsRes] = await Promise.all([
+    apiClient.get<ApiResponse<{ queue: string; stats: QueueStats }>>(`/v1/admin/media-queue?queue=${queueType}`),
+    apiClient.get<ApiResponse<{ queue: string; status: string; jobs: MediaJob[]; count: number }>>(`/v1/admin/media-queue/jobs?${params.toString()}`)
+  ]);
+
+  const stats = statsRes.data.data.stats;
+  const total = status === 'all' 
+    ? (stats.waiting + stats.active + stats.completed + stats.failed + stats.delayed)
+    : stats[status];
+
+  return {
+    stats,
+    jobs: jobsRes.data.data.jobs,
+    total,
+    totalPages: Math.ceil(total / limit)
+  };
 };
 
-const retryJob = async (jobId: string) => {
-  const { data } = await apiClient.post(`/v1/admin/media-queue/${jobId}/retry`);
+const retryJob = async ({ jobId, queueType }: { jobId: string, queueType: string }) => {
+  const { data } = await apiClient.post(`/v1/admin/media-queue/retry/${jobId}?queue=${queueType}`);
   return data;
 };
 
-const clearFailed = async () => {
-  const { data } = await apiClient.delete('/v1/admin/media-queue/failed');
+const clearFailed = async (queueType: string) => {
+  const { data } = await apiClient.delete(`/v1/admin/media-queue/failed?queue=${queueType}`);
   return data;
 };
 
@@ -69,13 +82,14 @@ function ProgressBar({ value }: { value: number }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function MediaQueuePage() {
+  const [queueType, setQueueType] = useState<'media' | 'email'>('media');
   const [statusFilter, setStatusFilter] = useState<JobStatus | 'all'>('all');
   const [page, setPage] = useState(1);
   const qc = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ['admin', 'media-queue', statusFilter, page],
-    queryFn:  () => fetchQueue(statusFilter, page),
+    queryKey: ['admin', 'media-queue', queueType, statusFilter, page],
+    queryFn:  () => fetchQueue(queueType, statusFilter, page),
     refetchInterval: 10000, // auto-refresh every 10s for active jobs
     placeholderData: prev => prev,
   });
@@ -118,8 +132,32 @@ export default function MediaQueuePage() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
         <div>
-          <h1 style={{ color: '#f8fafc', fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>Media Queue</h1>
+          <h1 style={{ color: '#f8fafc', fontSize: 22, fontWeight: 700, margin: '0 0 4px' }}>Task Queues</h1>
           <p style={{ color: '#64748b', fontSize: 13, margin: 0 }}>BullMQ job monitor — auto-refreshes every 10s</p>
+          
+          {/* Queue Type Toggle */}
+          <div style={{ display: 'flex', gap: 4, marginTop: 12, background: 'rgba(255,255,255,0.03)', padding: 4, borderRadius: 8, width: 'fit-content' }}>
+            <button
+              onClick={() => { setQueueType('media'); setPage(1); }}
+              style={{
+                padding: '6px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s',
+                background: queueType === 'media' ? '#7c3aed' : 'transparent',
+                color: queueType === 'media' ? '#fff' : '#94a3b8'
+              }}
+            >
+              Media Queue
+            </button>
+            <button
+              onClick={() => { setQueueType('email'); setPage(1); }}
+              style={{
+                padding: '6px 16px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500, transition: 'all 0.2s',
+                background: queueType === 'email' ? '#7c3aed' : 'transparent',
+                color: queueType === 'email' ? '#fff' : '#94a3b8'
+              }}
+            >
+              Email Queue
+            </button>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => refetch()}
@@ -127,7 +165,7 @@ export default function MediaQueuePage() {
             ↻ Refresh
           </button>
           {(stats?.failed ?? 0) > 0 && (
-            <button onClick={() => clearAll()} disabled={isClearing}
+            <button onClick={() => clearAll(queueType)} disabled={isClearing}
               style={{ padding: '8px 16px', borderRadius: 10, border: 'none', background: 'rgba(239,68,68,0.15)', color: '#f87171', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
               {isClearing ? 'Clearing...' : `Clear ${stats?.failed} Failed`}
             </button>
@@ -191,7 +229,7 @@ export default function MediaQueuePage() {
                   </p>
                 )}
                 <p style={{ color: '#475569', fontSize: 11, margin: '2px 0 0' }}>
-                  {new Date(job.createdAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  {new Date(job.timestamp).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                 </p>
               </div>
 
@@ -203,19 +241,21 @@ export default function MediaQueuePage() {
 
               {/* Progress */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <ProgressBar value={job.progress} />
-                <span style={{ color: '#64748b', fontSize: 11, minWidth: 28 }}>{job.progress}%</span>
+                <ProgressBar value={job.status === 'completed' ? 100 : job.progress} />
+                <span style={{ color: '#64748b', fontSize: 11, minWidth: 28 }}>
+                  {job.status === 'completed' ? 100 : job.progress}%
+                </span>
               </div>
 
               {/* Attempts */}
-              <span style={{ color: job.attemptsMade >= job.attemptsMax ? '#f87171' : '#94a3b8', fontSize: 12 }}>
-                {job.attemptsMade}/{job.attemptsMax}
+              <span style={{ color: job.attemptsMade > 0 ? '#f87171' : '#94a3b8', fontSize: 12 }}>
+                {job.attemptsMade} attempts
               </span>
 
               {/* Actions */}
               <div>
                 {job.status === 'failed' && (
-                  <button onClick={() => retry(job.id)} disabled={isRetrying}
+                  <button onClick={() => retry({ jobId: job.id, queueType })} disabled={isRetrying}
                     style={{ padding: '5px 12px', borderRadius: 8, border: 'none', background: 'rgba(124,58,237,0.15)', color: '#a78bfa', cursor: 'pointer', fontSize: 12, fontWeight: 500 }}>
                     ↻ Retry
                   </button>

@@ -3,18 +3,20 @@ import { z } from 'zod';
 // Step 1: Basic Info
 export const basicInfoSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100, 'Title is too long'),
-  description: z.string().min(10, 'Description must be at least 10 characters').max(1000, 'Description too long'),
+  overview: z.string().min(10, 'Overview must be at least 10 characters').max(1000, 'Overview too long'),
   releaseYear: z.number().min(1888, 'Invalid year').max(new Date().getFullYear() + 5, 'Invalid year'),
-  duration: z.number().min(1, 'Duration must be at least 1 minute'),
-  language: z.string().min(1, 'Language is required'),
+  runtime: z.number().min(1, 'Runtime must be at least 1 minute'),
+  spokenLanguage: z.string().min(1, 'Language is required'),
   contentRating: z.enum(['U', 'U/A', 'A']),
   type: z.enum(['Movie', 'Web Series']),
   seasonCount: z.number().optional(),
+  averageRating: z.number().min(0).max(10).optional(),
+  totalRatings: z.number().int().min(0).optional(),
 });
 
 // Step 2: Taxonomy
 export const taxonomySchema = z.object({
-  genreIds: z.array(z.string()).min(1, 'Select at least one genre'),
+  genreIds: z.array(z.string()).optional(),
   tags: z.string().optional(), // Will be split by comma later
   category: z.string().optional(),
 });

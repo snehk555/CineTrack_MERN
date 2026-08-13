@@ -43,9 +43,10 @@ export const errorHandler = (
   const mongoErr = err as MongoServerError;
   if (mongoErr.code === 11000) {
     const field = Object.keys(mongoErr.keyValue ?? {})[0] ?? 'field';
+    const fieldLabel = field === 'tmdbId' ? 'TMDB ID' : field;
     res.status(409).json({
       success: false,
-      message: `${field} already exists`,
+      message: `${fieldLabel} already exists`,
       code: 'CONFLICT',
     });
     return;

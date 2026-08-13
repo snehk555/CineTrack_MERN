@@ -17,16 +17,18 @@ export interface IMovie extends Document {
   trailerUrl?: string;
   releaseYear?: number;
   runtime?: number;
-  language?: string;
+  spokenLanguage?: string;
   country?: string;
-  categoryId: mongoose.Types.ObjectId;
+  contentRating?: 'U' | 'U/A' | 'A';
+  categoryId?: mongoose.Types.ObjectId;
   genreIds: mongoose.Types.ObjectId[];
   cast: CastMember[];
   directors: string[];
   averageRating: number;
   totalRatings: number;
   totalWatchlists: number;
-  status: 'published' | 'draft' | 'archived';
+  status: 'published' | 'draft' | 'archived' | 'scheduled';
+  publishAt?: Date;
   isFeatured: boolean;
   featuredUntil?: Date;
   isDeleted: boolean;
@@ -57,16 +59,18 @@ const movieSchema = new Schema<IMovie>(
     trailerUrl: { type: String },
     releaseYear: { type: Number, min: 1900 },
     runtime: { type: Number, min: 1 },
-    language: { type: String },
+    spokenLanguage: { type: String },
     country: { type: String },
-    categoryId: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    contentRating: { type: String, enum: ['U', 'U/A', 'A'], default: 'U/A' },
+    categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
     genreIds: [{ type: Schema.Types.ObjectId, ref: 'Genre' }],
     cast: [castMemberSchema],
     directors: [{ type: String }],
     averageRating: { type: Number, default: 0, min: 0, max: 10 },
     totalRatings: { type: Number, default: 0 },
     totalWatchlists: { type: Number, default: 0 },
-    status: { type: String, enum: ['published', 'draft', 'archived'], default: 'draft' },
+    status: { type: String, enum: ['published', 'draft', 'archived', 'scheduled'], default: 'draft' },
+    publishAt: { type: Date },
     isFeatured: { type: Boolean, default: false },
     featuredUntil: { type: Date },
     isDeleted: { type: Boolean, default: false, select: false },
@@ -89,4 +93,6 @@ movieSchema.index({ status: 1, isFeatured: 1 });
 movieSchema.index({ averageRating: -1 });
 movieSchema.index({ title: 'text', overview: 'text' });
 
-export default mongoose.model<IMovie>('Movie', movieSchema);
+const Movie = mongoose.model<IMovie>('Movie', movieSchema);
+Movie.syncIndexes().catch(err => console.error('Failed to sync movie indexes:', err));
+export default Movie;

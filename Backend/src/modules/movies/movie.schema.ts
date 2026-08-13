@@ -11,8 +11,12 @@ export const addMovieSchema = z.object({
   posterPath: z.string().optional(),
   backdropPath: z.string().optional(),
   runtime: z.number().int().min(1).max(600).optional(),
-  categoryId: mongoIdSchema,
-  genreIds: z.array(mongoIdSchema).min(1, 'At least one genre is required'),
+  categoryId: z.union([mongoIdSchema, z.literal('')]).optional().transform(val => val === '' ? undefined : val),
+  genreIds: z.array(z.union([mongoIdSchema, z.literal('')])).optional().transform(arr => arr?.filter(val => val !== '')),
+  contentRating: z.enum(['U', 'U/A', 'A']).optional(),
+  type: z.enum(['Movie', 'Web Series']).default('Movie'),
+  averageRating: z.number().min(0).max(10).optional(),
+  totalRatings: z.number().int().min(0).optional(),
 });
 
 export const updateMovieSchema = addMovieSchema.partial();

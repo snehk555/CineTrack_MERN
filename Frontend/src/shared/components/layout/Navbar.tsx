@@ -1,91 +1,207 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch, setSearch } from '../../../store';
 import { useLogoutMutation } from '../../../features/auth/hooks/authQueries';
 import NotificationDropdown from '../ui/NotificationDropdown';
 
+const YEARS = Array.from({ length: 2026 - 2000 + 1 }, (_, i) => 2026 - i);
+
 export default function Navbar() {
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { mutate: logout } = useLogoutMutation();
 
   const [searchInput, setSearchInput] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
+  const [yearOpen, setYearOpen] = useState(false);
+  const [mobileSearchOpen] = useState(false);
 
+  const yearRef = useRef<HTMLDivElement>(null);
+
+  // Debounced search dispatch
   useEffect(() => {
     const timer = setTimeout(() => { dispatch(setSearch(searchInput)); }, 400);
     return () => clearTimeout(timer);
   }, [searchInput, dispatch]);
 
-  return (
-    <nav className="sticky top-0 z-50 bg-[#09090b]/90 backdrop-blur-xl border-b border-white/8">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+  // Close dropdowns on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (yearRef.current && !yearRef.current.contains(e.target as Node)) setYearOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
+  const location = useLocation();
+  const isDetailPage = /^\/(movies|series)\/[^/]+$/.test(location.pathname);
+
+  const navLinkStyle = (active = false): React.CSSProperties => ({
+    fontSize: 13,
+    fontWeight: 600,
+    color: active ? '#fbbf24' : '#94a3b8',
+    textDecoration: 'none',
+    padding: '6px 4px',
+    borderBottom: active ? '2px solid #fbbf24' : '2px solid transparent',
+    transition: 'color 0.15s, border-color 0.15s',
+    whiteSpace: 'nowrap',
+  });
+
+  const isActive = (path: string) => location.pathname.startsWith(path);
+
+  return (
+    <nav style={{
+      position: 'sticky', top: 0, zIndex: 50,
+      background: 'rgba(9,9,11,0.95)',
+      backdropFilter: 'blur(20px)',
+      borderBottom: '1px solid rgba(255,255,255,0.07)',
+    }}>
+      <div style={{
+        maxWidth: 1400, margin: '0 auto',
+        padding: '0 20px',
+        height: 56,
+        display: 'flex', alignItems: 'center',
+        gap: 20,
+      }}>
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <span className="text-2xl">🎬</span>
-          <span className="text-white font-bold text-lg">
-            Cine<span className="text-amber-400">Track</span>
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <span style={{ fontSize: 20 }}>🎬</span>
+          <span style={{ fontWeight: 800, fontSize: 16, color: '#fff', letterSpacing: '-0.02em' }}>
+            Cine<span style={{ color: '#fbbf24' }}>Track</span>
           </span>
         </Link>
 
-        {/* Search */}
-        {isAuthenticated && (
-          <div className="flex-1 max-w-sm">
-            <input
-              type="text"
-              placeholder="Search movies..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-200 placeholder:text-slate-500 outline-none focus:border-amber-500 transition-colors"
-            />
-          </div>
-        )}
+        {/* Nav links — center */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flex: 1 }}>
+          <Link to="/" style={navLinkStyle(location.pathname === '/')}>Home</Link>
+          <Link to="/movies" style={navLinkStyle(isActive('/movies'))}>Movies</Link>
+          <Link to="/series" style={navLinkStyle(isActive('/series'))}>Web Series</Link>
+          {isAuthenticated && (
+            <Link to="/watchlist" style={navLinkStyle(isActive('/watchlist'))}>Watchlist</Link>
+          )}
 
-        {/* Nav Links */}
-        <div className="flex items-center gap-4">
+          {/* By Year dropdown */}
+          <div ref={yearRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => { setYearOpen(p => !p); }}
+              style={{
+                ...navLinkStyle(yearOpen),
+                background: 'none', border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              By Year <span style={{ fontSize: 10, opacity: 0.7 }}>{yearOpen ? '▲' : '▼'}</span>
+            </button>
+            {yearOpen && (
+              <div className="ct-nav-dropdown" style={{ maxHeight: 280, overflowY: 'auto' }}>
+                {YEARS.map((year) => (
+                  <button
+                    key={year}
+                    onClick={() => {
+                      setYearOpen(false);
+                      navigate(`/movies?year=${year}`);
+                    }}
+                    style={{ display: 'block', width: '100%', padding: '7px 16px', textAlign: 'left', fontSize: 13, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.15s' }}
+                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = '#fbbf24')}
+                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = '#94a3b8')}
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right side: Search + Auth */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          {/* Search box — hidden on detail pages */}
+          {!isDetailPage && (
+            <div style={{ position: 'relative' }}>
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                style={{
+                  width: mobileSearchOpen ? 180 : 150,
+                  padding: '6px 12px 6px 32px',
+                  borderRadius: 6,
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#e2e8f0',
+                  fontSize: 12,
+                  outline: 'none',
+                  transition: 'width 0.2s, border-color 0.2s',
+                }}
+                onFocus={e => (e.target.style.borderColor = '#fbbf24')}
+                onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+              />
+              <span style={{
+                position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)',
+                color: '#52525b', fontSize: 13, pointerEvents: 'none',
+              }}>
+                🔍
+              </span>
+            </div>
+          )}
+
           {isAuthenticated ? (
             <>
-              <Link to="/movies" className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:block">
-                Browse
-              </Link>
-              <Link to="/watchlist" className="text-sm text-slate-400 hover:text-white transition-colors hidden sm:block">
-                Watchlist
-              </Link>
-
-              {/* Notifications */}
               <NotificationDropdown />
 
-              {/* User Avatar */}
-              <div className="relative">
+              {/* User avatar + dropdown */}
+              <div style={{ position: 'relative' }}>
                 <button
-                  onClick={() => setProfileOpen((p) => !p)}
-                  className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-zinc-600 text-white font-bold text-sm flex items-center justify-center border-2 border-amber-500/50 hover:scale-110 transition-transform"
+                  onClick={() => setProfileOpen(p => !p)}
+                  style={{
+                    width: 34, height: 34, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #f59e0b, #78350f)',
+                    border: '2px solid rgba(245,158,11,0.4)',
+                    color: '#fff', fontWeight: 800, fontSize: 13,
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'transform 0.2s',
+                  }}
+                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.transform = 'scale(1.1)')}
+                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.transform = 'scale(1)')}
                 >
                   {user?.name.charAt(0).toUpperCase()}
                 </button>
 
                 {profileOpen && (
                   <div
-                    className="absolute top-12 right-0 w-52 bg-[#1e1e2e] border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
-                    style={{ animation: 'fadeInDown 0.15s ease-out' }}
+                    style={{
+                      position: 'absolute', top: 42, right: 0,
+                      width: 200,
+                      background: '#1a1a2e',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: 10,
+                      overflow: 'hidden',
+                      boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+                      animation: 'fadeInDown 0.15s ease-out',
+                      zIndex: 100,
+                    }}
                   >
-                    <div className="px-4 py-3 border-b border-white/8">
-                      <p className="text-white text-sm font-medium">{user?.name}</p>
-                      <p className="text-slate-400 text-xs">{user?.email}</p>
+                    <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                      <p style={{ color: '#fff', fontSize: 13, fontWeight: 700, margin: 0 }}>{user?.name}</p>
+                      <p style={{ color: '#52525b', fontSize: 11, margin: '2px 0 0' }}>{user?.email}</p>
                     </div>
-                    <div className="py-1">
-                      <Link to="/profile" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 transition-colors">
+                    <div>
+                      <Link to="/profile" onClick={() => setProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 13, color: '#94a3b8', textDecoration: 'none' }}>
                         👤 Profile
                       </Link>
+                      <Link to="/watchlist" onClick={() => setProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 13, color: '#94a3b8', textDecoration: 'none' }}>
+                        🔖 Watchlist
+                      </Link>
                       {user?.role === 'admin' && (
-                        <Link to="/admin" onClick={() => setProfileOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-amber-300 hover:bg-white/5 transition-colors">
+                        <Link to="/admin" onClick={() => setProfileOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 13, color: '#fbbf24', textDecoration: 'none' }}>
                           ⚙️ Admin Panel
                         </Link>
                       )}
                       <button
                         onClick={() => { setProfileOpen(false); logout(); }}
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors text-left"
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', fontSize: 13, color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                       >
                         🚪 Sign Out
                       </button>
@@ -96,8 +212,15 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="text-sm text-slate-400 hover:text-white transition-colors">Sign In</Link>
-              <Link to="/register" className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium rounded-xl transition-colors">
+              <Link to="/login" style={{ fontSize: 13, color: '#94a3b8', textDecoration: 'none', fontWeight: 600 }}>
+                Sign In
+              </Link>
+              <Link to="/register" style={{
+                fontSize: 12, fontWeight: 700,
+                background: '#f59e0b', color: '#09090b',
+                padding: '6px 14px', borderRadius: 6, textDecoration: 'none',
+                transition: 'background 0.2s',
+              }}>
                 Get Started
               </Link>
             </>

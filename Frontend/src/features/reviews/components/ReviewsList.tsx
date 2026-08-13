@@ -22,7 +22,7 @@ export default function ReviewsList({ movieId, movieTitle }: ReviewsListProps) {
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-white">Reviews</h2>
+          <h2 className="text-lg font-semibold text-white">Comments</h2>
           {total > 0 && (
             <span className="text-xs text-slate-500 bg-white/5 border border-white/8 px-2 py-0.5 rounded-full">
               {total}
@@ -38,11 +38,11 @@ export default function ReviewsList({ movieId, movieTitle }: ReviewsListProps) {
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M7 1v12M1 7h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             </svg>
-            Write Review
+            Add Comment
           </button>
         ) : (
           <p className="text-sm text-slate-500">
-            <a href="/login" className="text-amber-400 hover:underline">Sign in</a> to write a review
+            <a href="/login" className="text-amber-400 hover:underline">Sign in</a> to comment
           </p>
         )}
       </div>
@@ -70,7 +70,7 @@ export default function ReviewsList({ movieId, movieTitle }: ReviewsListProps) {
         ) : reviews.length === 0 ? (
           <div className="p-10 text-center">
             <p className="text-3xl mb-3">💬</p>
-            <p className="text-white font-medium text-sm">No reviews yet</p>
+            <p className="text-white font-medium text-sm">No comments yet</p>
             <p className="text-slate-500 text-sm mt-1">
               Be the first to share your thoughts!
             </p>

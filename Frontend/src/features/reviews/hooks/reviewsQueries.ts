@@ -26,7 +26,7 @@ export const useMovieReviews = (movieId: string) =>
 // ─── POST — submit a review ───────────────────────────────────────────────────
 interface SubmitReviewPayload {
   movieId: string;
-  rating: number;
+  rating?: number;
   comment?: string;
 }
 
@@ -41,7 +41,7 @@ export const useSubmitReview = () => {
       queryClient.invalidateQueries({ queryKey: reviewKeys.byMovie(vars.movieId) });
       // Invalidate movie detail too (totalReviews count changes)
       queryClient.invalidateQueries({ queryKey: ['movies', 'detail', vars.movieId] });
-      toast.success('Review submitted! It will appear after approval. ✅');
+      toast.success('Comment posted! ✅');
     },
     onError: (err: { response?: { data?: { message?: string } } }) => {
       toast.error(err?.response?.data?.message ?? 'Failed to submit review.');

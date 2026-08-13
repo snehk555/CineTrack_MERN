@@ -6,6 +6,9 @@ import { addWeeklyDigestJob } from '../queues/emailQueue.js';
 import { addCleanupMediaJob } from '../queues/mediaQueue.js';
 import User from '../models/user.model.js';
 import Subscription from '../models/subscription.model.js';
+import Movie from '../models/movie.model.js';
+import Series from '../models/series.model.js';
+import { invalidateCache } from '../middlewares/cache.middleware.js';
 
 export const startScheduledJobs = () => {
   // Every hour — recalculate trending movies and update Redis cache
@@ -16,6 +19,31 @@ export const startScheduledJobs = () => {
       logger.info('Scheduled job: trending movies cache refreshed');
     } catch (err) {
       logger.error('Scheduled job failed: trending refresh', { err });
+    }
+  });
+
+  // Every 5 minutes — publish scheduled content
+  cron.schedule('*/5 * * * *', async () => {
+    try {
+      const now = new Date();
+      const movieResult = await Movie.updateMany(
+        { status: 'scheduled', publishAt: { $lte: now } },
+        { $set: { status: 'published' }, $unset: { publishAt: "" } }
+      );
+      
+      const seriesResult = await Series.updateMany(
+        { status: 'scheduled', publishAt: { $lte: now } },
+        { $set: { status: 'published' }, $unset: { publishAt: "" } }
+      );
+
+      if (movieResult.modifiedCount > 0 || seriesResult.modifiedCount > 0) {
+        logger.info(`Scheduled Publishing: Published ${movieResult.modifiedCount} movies and ${seriesResult.modifiedCount} series.`);
+        await invalidateCache('cache:feed:featured');
+        await invalidateCache('movies:*');
+        await invalidateCache('series:*');
+      }
+    } catch (err) {
+      logger.error('Scheduled job failed: scheduled publishing', { err });
     }
   });
 
